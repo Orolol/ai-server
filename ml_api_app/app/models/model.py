@@ -1,6 +1,7 @@
 from app.models.base_model import OpenAIModel, HuggingFaceModel
 from app.agents.base_agent import CodingAgent, ChatAgent
 
+
 def predict(data, model_type="openai", model_name_or_key=None, agent_type=None):
     try:
         if model_type == "openai":
@@ -11,11 +12,12 @@ def predict(data, model_type="openai", model_name_or_key=None, agent_type=None):
             raise ValueError("Unsupported model type")
 
         if agent_type == "coding":
-            agent = CodingAgent(model, memory_db_path="memory_db")
+            agent = CodingAgent(model, memory_db_path="localhost")
         elif agent_type == "chat":
-            agent = ChatAgent(model, memory_db_path="memory_db")
+            agent = ChatAgent(model, memory_db_path="localhost")
         else:
-            raise ValueError(f"Unsupported agent type: {agent_type}. Supported types are 'coding' and 'chat'.")
+            raise ValueError(
+                f"Unsupported agent type: {agent_type}. Supported types are 'coding' and 'chat'.")
 
         prediction = agent.act({"prompt": data["data"]})
         print(f"Prediction: {prediction}")
