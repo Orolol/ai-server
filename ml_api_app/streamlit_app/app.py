@@ -10,10 +10,15 @@ if "conversation" not in st.session_state:
     st.session_state.conversation = []
 
 st.header("Chat Interface")
-for message in st.session_state.conversation:
-    st.write(f"{message['role']}: {message['content']}")
 
-input_data = st.text_area("Enter your message here")
+# Display chat messages with different styles for user and assistant
+for message in st.session_state.conversation:
+    if message['role'] == 'user':
+        st.markdown(f"<div style='text-align: right; background-color: #DCF8C6; padding: 10px; border-radius: 10px; margin: 5px 0;'>{message['content']}</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div style='text-align: left; background-color: #E6E6E6; padding: 10px; border-radius: 10px; margin: 5px 0;'>{message['content']}</div>", unsafe_allow_html=True)
+
+input_data = st.text_input("Enter your message here")
 
 model_type = st.selectbox("Select Model Type", ["openai", "huggingface"])
 model_name_or_key = st.text_input("Model Name or API Key")
