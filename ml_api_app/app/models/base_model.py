@@ -10,21 +10,23 @@ class OpenAIModel(Model):
         import os
         from openai import OpenAI
 
+        self.conversation_history = []
         self.client = OpenAI(
             api_key=os.environ.get("OPENAI_API_KEY"),
         )
 
     def predict(self, data):
+        self.conversation_history.append({"role": "user", "content": data["prompt"]})
+        
         chat_completion = self.client.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": data["prompt"],
-                }
-            ],
+            messages=self.conversation_history,
             model="gpt-4",
         )
-        return chat_completion.choices[0].message.content.strip()
+        
+        response = chat_completion.choices[0].message.content.strip()
+        self.conversation_history.append({"role": "assistant", "content": response})
+        
+        return response
 
 class HuggingFaceModel(Model):
     def __init__(self, model_name):
