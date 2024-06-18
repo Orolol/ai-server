@@ -14,7 +14,10 @@ class LongTermMemory:
             logger.info(f"Connecting to ChromaDB at {host}:{port}")
             print(f"Connecting to ChromaDB at {host}:{port}")
             self.client = chromadb.HttpClient(host=host, port=port)
-            self.collection = self.client.create_collection("interactions")
+            if "interactions" not in self.client.list_collections():
+                self.collection = self.client.create_collection("interactions")
+            else:
+                self.collection = self.client.get_collection("interactions")
             logger.info(f"Connected to ChromaDB at {host}:{port}")
         except Exception as e:
             logger.error(
