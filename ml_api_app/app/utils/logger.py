@@ -1,6 +1,8 @@
 import logging
 
-# Configure logging
+import sys
+
+# Configure logging to also print to stdout
 logging.basicConfig(level=logging.INFO)
 api_logger = logging.getLogger('api_logger')
 ai_logger = logging.getLogger('ai_logger')
@@ -18,6 +20,13 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 api_handler.setFormatter(formatter)
 ai_handler.setFormatter(formatter)
 
+# Add stream handler to print to stdout
+stream_handler = logging.StreamHandler(sys.stdout)
+stream_handler.setLevel(logging.INFO)
+stream_handler.setFormatter(formatter)
+
 # Add handlers to the loggers
+api_logger.addHandler(stream_handler)
+ai_logger.addHandler(stream_handler)
 api_logger.addHandler(api_handler)
 ai_logger.addHandler(ai_handler)

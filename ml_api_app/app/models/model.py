@@ -17,6 +17,8 @@ def predict(data, model_type="openai", model_name_or_key=None, agent_type=None):
         else:
             raise ValueError(f"Unsupported agent type: {agent_type}. Supported types are 'coding' and 'chat'.")
 
-        return {"prediction": agent.act(data)}
+        prediction = agent.act(data)
+        print(f"Prediction: {prediction}")
+        return {"prediction": prediction}
     except Exception as e:
         return {"error": str(e)}

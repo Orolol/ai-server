@@ -14,7 +14,9 @@ class CodingAgent(Agent):
 
     def act(self, data):
         # Implement the logic for coding agent
+        print(f"Data received by {self.__class__.__name__}: {data}")
         prediction = self.model.predict(data)
+        print(f"Prediction by {self.__class__.__name__}: {prediction}")
         self.memory.store_interaction("coding", prediction, data.get("keywords", []))
         return prediction
 
