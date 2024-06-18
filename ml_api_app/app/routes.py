@@ -1,5 +1,6 @@
 from flask import request, jsonify, Blueprint
 from app.agents.base_agent import ChatAgent, CodingAgent
+from app.models.base_model import WeakModel, StrongModel
 
 routes = Blueprint('routes', __name__)
 
@@ -15,10 +16,17 @@ def predict_route():
     model_type = data.get("model_type", "openai")
     model_name_or_key = data.get("model_name_or_key")
     agent_type = data.get("agent_type")
+    if model_type == "weak":
+        model = WeakModel(model_name_or_key)
+    elif model_type == "strong":
+        model = StrongModel(model_name_or_key)
+    else:
+        return jsonify({"error": "Invalid model type"}), 400
+
     if agent_type == "chat":
-        agent = ChatAgent(model_name_or_key)
+        agent = ChatAgent(model)
     elif agent_type == "coding":
-        agent = CodingAgent(model_name_or_key)
+        agent = CodingAgent(model)
     else:
         return jsonify({"error": "Invalid agent type"}), 400
 
