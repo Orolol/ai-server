@@ -7,7 +7,7 @@ class LongTermMemory:
 
     def store_interaction(self, agent_type, interaction, keywords):
         date = datetime.now().isoformat()
-        self.client.insert({
+        self.client.add({
             "agent_type": agent_type,
             "interaction": interaction,
             "keywords": keywords,
