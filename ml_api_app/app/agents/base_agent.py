@@ -12,11 +12,8 @@ class Agent(ABC):
 
 
 class CodingAgent(Agent):
-    def __init__(self, model, memory_db_path="localhost"):
-        print(
-            f"Initializing CodingAgent with model: {model} and memory_db_path: {memory_db_path}")
-        print(
-            f"Initializing ChatAgent with model: {model} and memory_db_path: {memory_db_path}")
+    def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
+        print(f"Initializing CodingAgent with model: {model}, memory_db_path: {memory_db_path}, preprompt: {preprompt}, system_message: {system_message}")
         self.memory = LongTermMemory(memory_db_path)
         self.conversation_history = []
         self.model = model
@@ -49,10 +46,12 @@ class CodingAgent(Agent):
 
 
 class ChatAgent(Agent):
-    def __init__(self, model, memory_db_path="localhost"):
+    def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
         self.memory = LongTermMemory(memory_db_path)
-        self.conversation_history = []
+        self.conversation_history = [{"role": "system", "content": system_message}]
         self.model = model
+        self.preprompt = preprompt
+        self.system_message = system_message
 
     def act(self, data):
         # Implement the logic for chat agent
@@ -68,13 +67,12 @@ class ChatAgent(Agent):
 
 
 class ChatSession:
-    def __init__(self, silent_agent, vocal_agent):
+    def __init__(self, silent_agent, vocal_agent, preprompt="", system_message=""):
         self.session_id = str(uuid.uuid4())
         self.silent_agent = silent_agent
         self.vocal_agent = vocal_agent
 
     def process_input(self, data):
-        enriched_data = {
-            "prompt": data["prompt"], "conversation_history": self.silent_agent.conversation_history}
+        enriched_data = {"prompt": f"{self.silent_agent.preprompt} {data['prompt']}", "conversation_history": self.silent_agent.conversation_history}
         response = self.vocal_agent.act(enriched_data)
         return response
