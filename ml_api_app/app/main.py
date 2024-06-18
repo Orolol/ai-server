@@ -6,11 +6,14 @@ from app.utils.logger import api_logger
 load_dotenv()
 
 app = Flask(__name__)
+print("Initializing Flask app")
 init_routes(app)
+print("Routes initialized")
 
 @app.before_request
 def log_request_info():
     api_logger.info(f"Request: {request.method} {request.url} - Body: {request.get_json()}")
 
 if __name__ == "__main__":
+    print("Starting Flask app")
     app.run(debug=True)
