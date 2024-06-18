@@ -20,6 +20,11 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 api_handler.setFormatter(formatter)
 ai_handler.setFormatter(formatter)
 
+# Create error handler
+error_handler = logging.FileHandler('error_log.log')
+error_handler.setLevel(logging.ERROR)
+error_handler.setFormatter(formatter)
+
 # Add stream handler to print to stdout
 stream_handler = logging.StreamHandler(sys.stdout)
 stream_handler.setLevel(logging.INFO)
@@ -30,3 +35,5 @@ api_logger.addHandler(stream_handler)
 ai_logger.addHandler(stream_handler)
 api_logger.addHandler(api_handler)
 ai_logger.addHandler(ai_handler)
+api_logger.addHandler(error_handler)
+ai_logger.addHandler(error_handler)
