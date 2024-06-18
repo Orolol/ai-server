@@ -5,7 +5,7 @@ setup(
     version='0.1',
     packages=find_packages(),
     install_requires=[
-        'Flask==2.0.1',
+        'Flask==3.0.3',
         'openai',
         'transformers',
         'chromadb',
