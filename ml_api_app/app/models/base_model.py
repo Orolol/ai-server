@@ -23,7 +23,7 @@ class OpenAIModel(Model):
             model="gpt-4",
         )
 
-        response = chat_completion.choices[0].message["content"].strip()
+        response = chat_completion.choices[0].message.content.strip()
         self.conversation_history.append({"role": "assistant", "content": response})
 
         return response
