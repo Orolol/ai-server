@@ -5,7 +5,7 @@ routes = Blueprint('routes', __name__)
 
 def init_routes(app):
     app.register_blueprint(routes)
-    @routes.route('/predict', methods=['POST'])
+@routes.route('/predict', methods=['POST'])
     def predict_route():
         data = request.get_json()
         prediction = predict(data)
