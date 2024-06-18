@@ -1,3 +1,4 @@
+import os
 from app.models.base_model import OpenAIModel, HuggingFaceModel
 from app.agents.base_agent import CodingAgent, ChatAgent
 
