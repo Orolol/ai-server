@@ -28,7 +28,7 @@ def send_message(chatsessionsid, prompt):
 if "chatsessionsid" not in st.session_state:
     system_message = st.text_input("System Message: ", "")
     if st.button("Start Chat Session"):
-        st.session_state["chatsessionsid"] = start_chat_session(preprompt, system_message)
+        st.session_state["chatsessionsid"] = start_chat_session(system_message)
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
