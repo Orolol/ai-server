@@ -45,9 +45,9 @@ def start_chat():
 
     try:
         print("Creating chat session")
-        vocal_model = create_model("strong", "gpt-4o")
+        vocal_model = create_model("strong", "openai")
         print("Vocal model created")
-        silent_model = create_model("weak", "gpt-3.5")
+        silent_model = create_model("weak", "openai")
         print("Silent model created")
         vocal_agent = create_agent("chat", vocal_model)
         print("Vocal agent created")
