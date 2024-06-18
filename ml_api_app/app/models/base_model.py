@@ -7,25 +7,24 @@ class Model(ABC):
 
 class OpenAIModel(Model):
     def __init__(self, api_key):
-        import openai
-        from dotenv import load_dotenv
         import os
+        from openai import OpenAI
 
-        load_dotenv()
-        self.api_key = os.getenv("OPENAI_API_KEY")
-        self.openai = openai
-        self.openai.api_key = self.api_key
+        self.client = OpenAI(
+            api_key=os.environ.get("OPENAI_API_KEY"),
+        )
 
     def predict(self, data):
-        response = self.openai.ChatCompletion.create(
-            model="gpt-4",
+        chat_completion = self.client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": data["prompt"]}
+                {
+                    "role": "user",
+                    "content": data["prompt"],
+                }
             ],
-            max_tokens=50
+            model="gpt-3.5-turbo",
         )
-        return response.choices[0].message["content"].strip()
+        return chat_completion.choices[0].message["content"].strip()
 
 class HuggingFaceModel(Model):
     def __init__(self, model_name):
