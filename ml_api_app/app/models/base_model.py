@@ -24,7 +24,7 @@ class OpenAIModel(Model):
             ],
             model="gpt-4",
         )
-        return chat_completion.choices[0].message["content"].strip()
+        return chat_completion.choices[0].message.content.strip()
 
 class HuggingFaceModel(Model):
     def __init__(self, model_name):
