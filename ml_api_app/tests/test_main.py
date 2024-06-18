@@ -15,4 +15,15 @@ class MainTestCase(unittest.TestCase):
         response = self.app.post('/chat', json={"message": "Hello, how are you?"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("response", response.get_json())
-    unittest.main()
+    def test_multiple_messages(self):
+        messages = [
+            {"message": "Hello, how are you?"},
+            {"message": "What is the weather like today?"},
+            {"message": "Tell me a joke."}
+        ]
+        for msg in messages:
+            response = self.app.post('/chat', json=msg)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn("response", response.get_json())
+
+unittest.main()
