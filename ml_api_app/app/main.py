@@ -13,5 +13,19 @@ app.register_blueprint(routes)
 def log_request_info():
     api_logger.info(f"Request: {request.method} {request.url} - Body: {request.get_json()}")
 
-if __name__ == "__main__":
+from app.agents.base_agent import ChatSession, CodingAgent, ChatAgent
+from app.models.model import predict
+
+# Initialize agents
+silent_agent = CodingAgent(model=predict)
+vocal_agent = ChatAgent(model=predict)
+
+# Create a chat session
+chat_session = ChatSession(silent_agent=silent_agent, vocal_agent=vocal_agent)
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json()
+    response = chat_session.process_input(data)
+    return response
     app.run(debug=True)

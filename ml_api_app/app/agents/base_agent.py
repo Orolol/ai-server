@@ -1,5 +1,6 @@
 from app.memory.long_term_memory import LongTermMemory
 from abc import ABC, abstractmethod
+import uuid
 
 
 class Agent(ABC):
@@ -53,3 +54,13 @@ class ChatAgent(Agent):
         self.memory.store_interaction(
             "chat", prediction, data.get("keywords", []))
         return prediction
+class ChatSession:
+    def __init__(self, silent_agent, vocal_agent):
+        self.session_id = str(uuid.uuid4())
+        self.silent_agent = silent_agent
+        self.vocal_agent = vocal_agent
+
+    def process_input(self, data):
+        enriched_data = self.silent_agent.act(data)
+        response = self.vocal_agent.act(enriched_data)
+        return response
