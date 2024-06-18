@@ -25,7 +25,7 @@ class OpenAIModel(Model):
             ],
             max_tokens=50
         )
-        return response.choices[0].text.strip()
+        return response.choices[0].message["content"].strip()
 
 class HuggingFaceModel(Model):
     def __init__(self, model_name):
