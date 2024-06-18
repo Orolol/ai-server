@@ -5,18 +5,26 @@ class Agent(ABC):
     def act(self, data):
         pass
 
+from app.memory.long_term_memory import LongTermMemory
+
 class CodingAgent(Agent):
-    def __init__(self, model):
+    def __init__(self, model, memory_db_path="memory_db"):
+        self.memory = LongTermMemory(memory_db_path)
         self.model = model
 
     def act(self, data):
         # Implement the logic for coding agent
-        return self.model.predict(data)
+        prediction = self.model.predict(data)
+        self.memory.store_interaction("coding", prediction, data.get("keywords", []))
+        return prediction
 
 class ChatAgent(Agent):
-    def __init__(self, model):
+    def __init__(self, model, memory_db_path="memory_db"):
+        self.memory = LongTermMemory(memory_db_path)
         self.model = model
 
     def act(self, data):
         # Implement the logic for chat agent
-        return self.model.predict(data)
+        prediction = self.model.predict(data)
+        self.memory.store_interaction("chat", prediction, data.get("keywords", []))
+        return prediction

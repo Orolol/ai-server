@@ -10,9 +10,9 @@ def predict(data, model_type="openai", model_name_or_key=None, agent_type=None):
         raise ValueError("Unsupported model type")
 
     if agent_type == "coding":
-        agent = CodingAgent(model)
+        agent = CodingAgent(model, memory_db_path="memory_db")
     elif agent_type == "chat":
-        agent = ChatAgent(model)
+        agent = ChatAgent(model, memory_db_path="memory_db")
     else:
         raise ValueError("Unsupported agent type")
 
