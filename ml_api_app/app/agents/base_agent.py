@@ -30,7 +30,9 @@ class ChatAgent(Agent):
 
     def act(self, data):
         # Implement the logic for chat agent
+        self.model.conversation_history.append({"role": "user", "content": data["prompt"]})
         prediction = self.model.predict(data)
+        self.model.conversation_history.append({"role": "assistant", "content": prediction})
         self.memory.store_interaction(
             "chat", prediction, data.get("keywords", []))
         return prediction
