@@ -1,5 +1,9 @@
 from flask import request, jsonify, Blueprint
-from app.agents.base_agent import ChatAgent, CodingAgent
+from app.agents.base_agent import ChatAgent, CodingAgent, ChatSession
+import uuid
+
+# Store chat sessions
+chat_sessions = {}
 from app.models.base_model import WeakModel, StrongModel
 
 routes = Blueprint('routes', __name__)
@@ -29,7 +33,38 @@ def create_agent(agent_type, model):
         raise ValueError("Invalid agent type")
 
 
-@routes.route('/predict', methods=['POST'])
+@routes.route('/start_chat', methods=['POST'])
+def start_chat():
+    data = request.get_json()
+    print(f"Received data to start chat: {data}")
+
+    try:
+        vocal_model = create_model("strong", "gpt-4o")
+        silent_model = create_model("weak", "gpt-3.5")
+        vocal_agent = create_agent("chat", vocal_model)
+        silent_agent = create_agent("chat", silent_model)
+        chat_session = ChatSession(silent_agent, vocal_agent)
+        chat_sessions[chat_session.session_id] = chat_session
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify({"chatsessionsid": chat_session.session_id})
+
+
+@routes.route('/send_message', methods=['POST'])
+def send_message():
+    data = request.get_json()
+    print(f"Received data to send message: {data}")
+
+    chatsessionsid = data.get("chatsessionsid")
+    if not chatsessionsid or chatsessionsid not in chat_sessions:
+        return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
+
+    chat_session = chat_sessions[chatsessionsid]
+    response = chat_session.process_input(data)
+    print(f"Chat session response: {response}")
+    return jsonify(response)
+
 def predict_route():
     data = request.get_json()
     print(f"Received data: {data}")

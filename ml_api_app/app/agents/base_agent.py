@@ -62,6 +62,6 @@ class ChatSession:
         self.vocal_agent = vocal_agent
 
     def process_input(self, data):
-        enriched_data = self.silent_agent.act(data)
+        enriched_data = {"prompt": data["prompt"], "conversation_history": self.silent_agent.conversation_history}
         response = self.vocal_agent.act(enriched_data)
         return response
