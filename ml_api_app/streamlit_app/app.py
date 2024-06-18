@@ -34,8 +34,11 @@ def display_messages():
     for message in st.session_state["messages"]:
         st.write(f"{message['role']}: {message['content']}")
 
+def send_message_callback():
+    st.session_state["send_message"] = True
+
 # User input
-user_input = st.text_input("You: ", "", key="user_input", on_change=lambda: st.session_state["send_message"] = True)
+user_input = st.text_input("You: ", "", key="user_input", on_change=send_message_callback)
 
 if st.session_state.get("send_message"):
     if user_input:
