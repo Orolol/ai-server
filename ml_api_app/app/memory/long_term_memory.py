@@ -12,11 +12,13 @@ class LongTermMemory:
             host = host or os.getenv("CHROMADB_HOST", "localhost")
             port = port or int(os.getenv("CHROMADB_PORT", 8000))
             logger.info(f"Connecting to ChromaDB at {host}:{port}")
+            print(f"Connecting to ChromaDB at {host}:{port}")
             self.client = chromadb.HttpClient(host=host, port=port)
             self.collection = self.client.create_collection("interactions")
             logger.info(f"Connected to ChromaDB at {host}:{port}")
         except Exception as e:
-            logger.error(f"Failed to connect to ChromaDB at {host}:{port} - {str(e)}", exc_info=True)
+            logger.error(
+                f"Failed to connect to ChromaDB at {host}:{port} - {str(e)}", exc_info=True)
             raise
 
     def store_interaction(self, agent_type, interaction, keywords):
@@ -31,7 +33,8 @@ class LongTermMemory:
             logger.info(
                 f"Stored interaction for agent type {agent_type} with keywords {keywords}")
         except Exception as e:
-            logger.error(f"Failed to store interaction - {str(e)}", exc_info=True)
+            logger.error(
+                f"Failed to store interaction - {str(e)}", exc_info=True)
             raise
 
     def retrieve_interactions(self, keywords):
@@ -43,5 +46,6 @@ class LongTermMemory:
             logger.info(f"Retrieved interactions for keywords {keywords}")
             return results
         except Exception as e:
-            logger.error(f"Failed to retrieve interactions - {str(e)}", exc_info=True)
+            logger.error(
+                f"Failed to retrieve interactions - {str(e)}", exc_info=True)
             raise
