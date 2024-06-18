@@ -69,7 +69,13 @@ ml_api_app/
    echo "OPENAI_API_KEY=your_openai_api_key" > .env
    ```
 
-5. **Run the application:**
+5. **Run the ChromaDB server:**
+   To run the ChromaDB server, use the following command:
+   ```sh
+   chromadb-server --host localhost --port 8000
+   ```
+
+6. **Run the application:**
    ```sh
    python -m app.main
    ```
