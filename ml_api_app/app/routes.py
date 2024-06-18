@@ -8,5 +8,7 @@ def init_routes(app):
 @routes.route('/predict', methods=['POST'])
 def predict_route():
     data = request.get_json()
+    print(f"Received data: {data}")
     prediction = predict(data)
+    print(f"Prediction result: {prediction}")
     return jsonify(prediction)
