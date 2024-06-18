@@ -3,8 +3,8 @@ import requests
 
 st.title("Chat with AI")
 
-def start_chat_session(preprompt="", system_message=""):
-    data = {"preprompt": preprompt, "system_message": system_message}
+def start_chat_session(system_message=""):
+    data = {"system_message": system_message}
     response = requests.post("http://localhost:5000/start_chat", json=data, headers={"Content-Type": "application/json"})
     if response.status_code == 200:
         return response.json()["chatsessionsid"]
@@ -26,7 +26,6 @@ def send_message(chatsessionsid, prompt):
 
 # Start a new chat session
 if "chatsessionsid" not in st.session_state:
-    preprompt = st.text_input("Preprompt: ", "")
     system_message = st.text_input("System Message: ", "")
     if st.button("Start Chat Session"):
         st.session_state["chatsessionsid"] = start_chat_session(preprompt, system_message)
