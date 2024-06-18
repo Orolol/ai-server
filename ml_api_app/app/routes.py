@@ -1,10 +1,10 @@
+from app.models.base_model import WeakModel, StrongModel
 from flask import request, jsonify, Blueprint
 from app.agents.base_agent import ChatAgent, CodingAgent, ChatSession
 import uuid
 
 # Store chat sessions
 chat_sessions = {}
-from app.models.base_model import WeakModel, StrongModel
 
 routes = Blueprint('routes', __name__)
 
@@ -39,6 +39,7 @@ def start_chat():
     print(f"Received data to start chat: {data}")
 
     try:
+        print("Creating chat session")
         vocal_model = create_model("strong", "gpt-4o")
         silent_model = create_model("weak", "gpt-3.5")
         vocal_agent = create_agent("chat", vocal_model)
@@ -46,6 +47,7 @@ def start_chat():
         chat_session = ChatSession(silent_agent, vocal_agent)
         chat_sessions[chat_session.session_id] = chat_session
     except ValueError as e:
+        print(f"Error starting chat: {e}")
         return jsonify({"error": str(e)}), 400
 
     return jsonify({"chatsessionsid": chat_session.session_id})
@@ -63,19 +65,4 @@ def send_message():
     chat_session = chat_sessions[chatsessionsid]
     response = chat_session.process_input(data)
     print(f"Chat session response: {response}")
-    return jsonify(response)
-
-def predict_route():
-    data = request.get_json()
-    print(f"Received data: {data}")
-
-    try:
-        model = create_model(data.get("model_type", "strong"),
-                             data.get("model_name_or_key"))
-        agent = create_agent(data.get("agent_type"), model)
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-
-    response = agent.act(data)
-    print(f"Agent response: {response}")
     return jsonify(response)
