@@ -14,6 +14,7 @@ class CodingAgent(Agent):
         self.memory = LongTermMemory(memory_db_path)
         self.conversation_history = []
         self.model = model
+        self.conversation_history = []
 
     def act(self, data):
         # Implement the logic for coding agent
@@ -49,9 +50,10 @@ class ChatAgent(Agent):
 
     def act(self, data):
         # Implement the logic for chat agent
-        self.model.conversation_history.append({"role": "user", "content": data["prompt"]})
+        self.conversation_history.append({"role": "user", "content": data["prompt"]})
+        data["conversation_history"] = self.conversation_history
         prediction = self.model.predict(data)
-        self.model.conversation_history.append({"role": "assistant", "content": prediction})
+        self.conversation_history.append({"role": "assistant", "content": prediction})
         self.memory.store_interaction(
             "chat", prediction, data.get("keywords", []))
         return prediction
