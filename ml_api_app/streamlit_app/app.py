@@ -4,7 +4,7 @@ import requests
 st.title("Chat with AI")
 
 def start_chat_session():
-    response = requests.post("http://localhost:5000/start_chat", headers={"Content-Type": "application/json"})
+    response = requests.post("http://localhost:5000/start_chat", json={}, headers={"Content-Type": "application/json"})
     if response.status_code == 200:
         return response.json()["chatsessionsid"]
     else:
