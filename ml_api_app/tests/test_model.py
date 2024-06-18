@@ -6,5 +6,5 @@ class ModelTestCase(unittest.TestCase):
         result = predict({"data": "test"})
         self.assertIn("prediction", result)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

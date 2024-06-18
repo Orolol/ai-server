@@ -10,5 +10,6 @@ setup(
         'transformers',
         'chromadb',
         'python-dotenv',
+        'streamlit',
     ],
 )

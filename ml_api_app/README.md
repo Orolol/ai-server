@@ -74,6 +74,14 @@ ml_api_app/
    python -m app.main
    ```
 
+## Running the Streamlit Frontend
+
+To run the Streamlit frontend, use the following command:
+
+```sh
+streamlit run ml_api_app/streamlit_app/app.py
+```
+
 ## Usage
 
 ### API Endpoints
