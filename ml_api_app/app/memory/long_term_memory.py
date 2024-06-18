@@ -1,12 +1,16 @@
 import chromadb
 from datetime import datetime
+import os
 import logging
 
 logger = logging.getLogger(__name__)
 
 class LongTermMemory:
-    def __init__(self, host="localhost", port=8000):
+    def __init__(self, host=None, port=None):
         try:
+            host = host or os.getenv("CHROMADB_HOST", "localhost")
+            port = port or int(os.getenv("CHROMADB_PORT", 8000))
+            logger.info(f"Connecting to ChromaDB at {host}:{port}")
             self.client = chromadb.HttpClient(host=host, port=port)
             self.collection = self.client.create_collection("interactions")
             logger.info(f"Connected to ChromaDB at {host}:{port}")
