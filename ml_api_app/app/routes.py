@@ -33,9 +33,10 @@ def create_agent(agent_type, model):
 def predict_route():
     data = request.get_json()
     print(f"Received data: {data}")
-    
+
     try:
-        model = create_model(data.get("model_type", "weak"), data.get("model_name_or_key"))
+        model = create_model(data.get("model_type", "strong"),
+                             data.get("model_name_or_key"))
         agent = create_agent(data.get("agent_type"), model)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
