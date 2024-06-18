@@ -13,12 +13,14 @@ def init_routes(app):
 def predict_route():
     data = request.get_json()
     print(f"Received data: {data}")
-    model_type = data.get("model_type", "openai")
+    model_type = data.get("model_type", "weak")
     model_name_or_key = data.get("model_name_or_key")
     agent_type = data.get("agent_type")
     print(f"Model type: {model_type}")
     print(f"Model name or key: {model_name_or_key}")
-    if model_type == "weak":
+    if model_type == "openai":
+        model = WeakModel("openai")
+    elif model_type == "weak":
         model = WeakModel(model_name_or_key)
     elif model_type == "strong":
         model = StrongModel(model_name_or_key)
