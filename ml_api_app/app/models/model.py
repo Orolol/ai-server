@@ -21,4 +21,5 @@ def predict(data, model_type="openai", model_name_or_key=None, agent_type=None):
         print(f"Prediction: {prediction}")
         return {"prediction": prediction}
     except Exception as e:
-        return {"error": str(e)}
+        import traceback
+        return {"error": str(e), "stack": traceback.format_exc()}
