@@ -9,10 +9,11 @@ class OpenAIModel(Model):
     def __init__(self, api_key):
         import openai
         self.api_key = api_key
-        openai.api_key = self.api_key
+        self.openai = openai
+        self.openai.api_key = self.api_key
 
     def predict(self, data):
-        response = openai.Completion.create(
+        response = self.openai.Completion.create(
             engine="davinci",
             prompt=data["prompt"],
             max_tokens=50
