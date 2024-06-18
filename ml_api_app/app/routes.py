@@ -15,7 +15,8 @@ def init_routes(app):
 
 
 def create_model(model_type, model_name_or_key):
-    print(f"Creating model of type: {model_type} with key: {model_name_or_key}")
+    print(
+        f"Creating model of type: {model_type} with key: {model_name_or_key}")
     if model_type == "openai":
         return WeakModel("openai")
     elif model_type == "weak":
