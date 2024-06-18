@@ -31,9 +31,9 @@ class CodingAgent(Agent):
         from app.utils.logger import ai_logger
         import datetime
 
-        self.model.conversation_history.append({"role": "user", "content": data["prompt"]})
+        self.conversation_history.append({"role": "user", "content": data["prompt"]})
         prediction = self.model.predict(data)
-        self.model.conversation_history.append({"role": "assistant", "content": prediction})
+        self.conversation_history.append({"role": "assistant", "content": prediction})
         self.memory.store_interaction(
             "chat", prediction, data.get("keywords", []))
         
