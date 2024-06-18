@@ -17,9 +17,12 @@ class OpenAIModel(Model):
         self.openai.api_key = self.api_key
 
     def predict(self, data):
-        response = self.openai.Completion.create(
-            engine="davinci",
-            prompt=data["prompt"],
+        response = self.openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": data["prompt"]}
+            ],
             max_tokens=50
         )
         return response.choices[0].text.strip()
