@@ -27,7 +27,7 @@ class LongTermMemory:
             self.collection.add(
                 documents=[interaction],
                 metadatas=[{"agent_type": agent_type,
-                            "keywords": keywords, "date": date}],
+                            "keywords": ", ".join(keywords), "date": date}],
                 ids=[f"{agent_type}_{date}"]
             )
             logger.info(
