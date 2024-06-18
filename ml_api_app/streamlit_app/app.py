@@ -38,7 +38,7 @@ def send_message_callback():
     st.session_state["send_message"] = True
 
 # User input
-user_input = st.text_input("You: ", "", key="user_input", on_change=send_message_callback)
+user_input = st.text_input("You: ", st.session_state.get("user_input_reset", ""), key="user_input", on_change=send_message_callback)
 
 if st.session_state.get("send_message"):
     if user_input:
@@ -46,7 +46,7 @@ if st.session_state.get("send_message"):
         if response:
             st.session_state["messages"].append({"role": "user", "content": user_input})
             st.session_state["messages"].append({"role": "AI", "content": response})
-            st.session_state["user_input"] = ""
+            st.session_state["user_input_reset"] = ""
     else:
         st.error("Please enter a message")
     st.session_state["send_message"] = False
