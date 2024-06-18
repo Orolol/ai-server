@@ -63,7 +63,13 @@ ml_api_app/
    pip install -r requirements.txt
    ```
 
-4. **Run the application:**
+4. **Set up environment variables:**
+   Create a `.env` file in the root directory and add your OpenAI API key:
+   ```sh
+   echo "OPENAI_API_KEY=your_openai_api_key" > .env
+   ```
+
+5. **Run the application:**
    ```sh
    python -m app.main
    ```

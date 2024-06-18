@@ -6,5 +6,9 @@ setup(
     packages=find_packages(),
     install_requires=[
         'Flask==2.0.1',
+        'openai',
+        'transformers',
+        'chromadb',
+        'python-dotenv',
     ],
 )
