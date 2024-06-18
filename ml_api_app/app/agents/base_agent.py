@@ -12,6 +12,7 @@ class Agent(ABC):
 class CodingAgent(Agent):
     def __init__(self, model, memory_db_path="localhost"):
         self.memory = LongTermMemory(memory_db_path)
+        self.conversation_history = []
         self.model = model
 
     def act(self, data):
