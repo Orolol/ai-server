@@ -1,10 +1,9 @@
 import chromadb
-from chromadb.config import Settings
 from datetime import datetime
 
 class LongTermMemory:
-    def __init__(self, db_path):
-        self.client = chromadb.Client(Settings(chroma_db_impl="duckdb+parquet", persist_directory=db_path))
+    def __init__(self, host="localhost", port=8000):
+        self.client = chromadb.HttpClient(host=host, port=port)
         self.collection = self.client.create_collection("interactions")
 
     def store_interaction(self, agent_type, interaction, keywords):
