@@ -40,23 +40,28 @@ def create_agent(agent_type, model):
 @routes.route('/start_chat', methods=['POST'])
 def start_chat():
     print("Received request to start chat")
-    print("Received request to send message")
     data = request.get_json()
     print(f"Request data: {data}")
-    print(f"Request data: {data}")
-    print(f"Received data to start chat: {data}")
 
     try:
         print("Creating chat session")
         vocal_model = create_model("strong", "gpt-4o")
+        print("Vocal model created")
         silent_model = create_model("weak", "gpt-3.5")
+        print("Silent model created")
         vocal_agent = create_agent("chat", vocal_model)
+        print("Vocal agent created")
         silent_agent = create_agent("chat", silent_model)
+        print("Silent agent created")
         chat_session = ChatSession(silent_agent, vocal_agent)
+        print(f"Chat session created with ID: {chat_session.session_id}")
         chat_sessions[chat_session.session_id] = chat_session
     except ValueError as e:
         print(f"Error starting chat: {e}")
         return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return jsonify({"error": "Unexpected error occurred"}), 500
 
     return jsonify({"chatsessionsid": chat_session.session_id})
 
