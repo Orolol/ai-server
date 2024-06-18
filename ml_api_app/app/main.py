@@ -16,9 +16,12 @@ def log_request_info():
 from app.agents.base_agent import ChatSession, CodingAgent, ChatAgent
 from app.models.model import predict
 
-# Initialize agents
-silent_agent = CodingAgent(model=predict)
-vocal_agent = ChatAgent(model=predict)
+# Initialize agents with strong and weak models
+strong_model = lambda data: predict(data, model_type="openai", model_name_or_key="gpt-4")
+weak_model = lambda data: predict(data, model_type="openai", model_name_or_key="gpt-3.5")
+
+silent_agent = CodingAgent(model=weak_model)
+vocal_agent = ChatAgent(model=strong_model)
 
 # Create a chat session
 chat_session = ChatSession(silent_agent=silent_agent, vocal_agent=vocal_agent)
