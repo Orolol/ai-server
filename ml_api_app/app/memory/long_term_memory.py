@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class LongTermMemory:
     def __init__(self, host=None, port=None):
         try:
@@ -15,7 +16,8 @@ class LongTermMemory:
             self.collection = self.client.create_collection("interactions")
             logger.info(f"Connected to ChromaDB at {host}:{port}")
         except Exception as e:
-            logger.error(f"Failed to connect to ChromaDB at {host}:{port} - {str(e)}")
+            logger.error(
+                f"Failed to connect to ChromaDB at {host}:{port} - {str(e)}")
             raise
 
     def store_interaction(self, agent_type, interaction, keywords):
@@ -27,7 +29,8 @@ class LongTermMemory:
                             "keywords": keywords, "date": date}],
                 ids=[f"{agent_type}_{date}"]
             )
-            logger.info(f"Stored interaction for agent type {agent_type} with keywords {keywords}")
+            logger.info(
+                f"Stored interaction for agent type {agent_type} with keywords {keywords}")
         except Exception as e:
             logger.error(f"Failed to store interaction - {str(e)}")
             raise
