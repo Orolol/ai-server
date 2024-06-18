@@ -17,9 +17,26 @@ class CodingAgent(Agent):
         # Implement the logic for coding agent
         print(f"Data received by {self.__class__.__name__}: {data}")
         prediction = self.model.predict(data)
+        from app.utils.logger import ai_logger
+        import datetime
+
         print(f"Prediction by {self.__class__.__name__}: {prediction}")
         self.memory.store_interaction(
             "coding", prediction, data.get("keywords", []))
+        
+        ai_logger.info(f"{datetime.datetime.now()} - Model: {self.model.__class__.__name__}, Agent: {self.__class__.__name__}, Interaction: {prediction}")
+        
+        from app.utils.logger import ai_logger
+        import datetime
+
+        self.model.conversation_history.append({"role": "user", "content": data["prompt"]})
+        prediction = self.model.predict(data)
+        self.model.conversation_history.append({"role": "assistant", "content": prediction})
+        self.memory.store_interaction(
+            "chat", prediction, data.get("keywords", []))
+        
+        ai_logger.info(f"{datetime.datetime.now()} - Model: {self.model.__class__.__name__}, Agent: {self.__class__.__name__}, Interaction: {prediction}")
+        
         return prediction
 
 
