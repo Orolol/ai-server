@@ -24,7 +24,7 @@ def predict(data, model_type="openai", model_name_or_key=None, agent_type=None):
         from app.utils.logger import ai_logger
         import datetime
 
-        ai_logger.info(f"{datetime.datetime.now()} - Model: {model.__class__.__name__}, Agent: {agent.__class__.__name__}, Interaction: {prediction}")
+        ai_logger.info(f"{datetime.datetime.now()} - Model: {model.__class__.__name__}, Agent: {agent.__class__.__name__}, Input: {data}, Interaction: {prediction}")
         
         return {"prediction": prediction}
     except Exception as e:

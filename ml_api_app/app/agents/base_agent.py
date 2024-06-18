@@ -24,7 +24,7 @@ class CodingAgent(Agent):
         self.memory.store_interaction(
             "coding", prediction, data.get("keywords", []))
         
-        ai_logger.info(f"{datetime.datetime.now()} - Model: {self.model.__class__.__name__}, Agent: {self.__class__.__name__}, Interaction: {prediction}")
+        ai_logger.info(f"{datetime.datetime.now()} - Model: {self.model.__class__.__name__}, Agent: {self.__class__.__name__}, Input: {data}, Interaction: {prediction}")
         
         from app.utils.logger import ai_logger
         import datetime
@@ -35,7 +35,7 @@ class CodingAgent(Agent):
         self.memory.store_interaction(
             "chat", prediction, data.get("keywords", []))
         
-        ai_logger.info(f"{datetime.datetime.now()} - Model: {self.model.__class__.__name__}, Agent: {self.__class__.__name__}, Interaction: {prediction}")
+        ai_logger.info(f"{datetime.datetime.now()} - Model: {self.model.__class__.__name__}, Agent: {self.__class__.__name__}, Input: {data}, Interaction: {prediction}")
         
         return prediction
 
