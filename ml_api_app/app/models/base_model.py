@@ -8,7 +8,11 @@ class Model(ABC):
 class OpenAIModel(Model):
     def __init__(self, api_key):
         import openai
-        self.api_key = api_key
+        from dotenv import load_dotenv
+        import os
+
+        load_dotenv()
+        self.api_key = os.getenv("OPENAI_API_KEY")
         self.openai = openai
         self.openai.api_key = self.api_key
 
