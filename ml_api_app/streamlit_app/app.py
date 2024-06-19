@@ -7,6 +7,7 @@ def start_chat_session():
     data = {}
     response = requests.post("http://localhost:5000/start_chat", json=data, headers={"Content-Type": "application/json"})
     if response.status_code == 200:
+        st.session_state["user_input"] = ""
         return response.json()["chatsessionsid"]
         st.session_state["user_input"] = ""
     else:
@@ -66,8 +67,8 @@ if st.session_state.get("send_message"):
         response = send_message(st.session_state["chatsessionsid"], user_input)
         if response:
             st.session_state["messages"].append({"role": "user", "content": user_input})
-            st.session_state["messages"].append({"role": "AI", "content": response})
-            st.session_state["user_input_reset"] = ""
+            st.session_state["messages"].append({"role": "AI", "content": response["response"]})
+            st.session_state["user_input"] = ""
     else:
         st.error("Please enter a message")
     st.session_state["send_message"] = False
