@@ -1,6 +1,7 @@
 from app.memory.long_term_memory import LongTermMemory
 from abc import ABC, abstractmethod
 from app.utils.logger import ai_logger
+from jinja2 import Environment, FileSystemLoader
 import datetime
 import uuid
 
@@ -14,6 +15,9 @@ class Agent(ABC):
 class CodingAgent(Agent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
         print(f"Initializing CodingAgent with model: {model}, memory_db_path: {memory_db_path}, preprompt: {preprompt}, system_message: {system_message}")
+        env = Environment(loader=FileSystemLoader('templates'))
+        template = env.get_template('preprompt_template.jinja')
+        self.preprompt = template.render()
         self.memory = LongTermMemory(memory_db_path)
         self.conversation_history = []
         self.model = model
@@ -47,10 +51,12 @@ class CodingAgent(Agent):
 
 class ChatAgent(Agent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
+        env = Environment(loader=FileSystemLoader('templates'))
+        template = env.get_template('preprompt_template.jinja')
+        self.preprompt = template.render()
         self.memory = LongTermMemory(memory_db_path)
         self.conversation_history = [{"role": "system", "content": system_message}]
         self.model = model
-        self.preprompt = preprompt
         self.system_message = system_message
 
     def act(self, data):

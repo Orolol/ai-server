@@ -27,12 +27,12 @@ def create_model(model_type, model_name_or_key):
         raise ValueError("Invalid model type")
 
 
-def create_agent(agent_type, model, preprompt="", system_message=""):
+def create_agent(agent_type, model, system_message=""):
     print(f"Creating agent of type: {agent_type} with model: {model}")
     if agent_type == "chat":
-        return ChatAgent(model, preprompt=preprompt, system_message=system_message)
+        return ChatAgent(model, system_message=system_message)
     elif agent_type == "coding":
-        return CodingAgent(model, preprompt=preprompt, system_message=system_message)
+        return CodingAgent(model, system_message=system_message)
     else:
         raise ValueError("Invalid agent type")
 
@@ -43,19 +43,18 @@ def start_chat():
     data = request.get_json()
     print(f"Request data: {data}")
 
-    preprompt = data.get("preprompt", "")
     system_message = data.get("system_message", "")
 
     try:
-        print(f"Preprompt: {preprompt}, System message: {system_message}")
+        print(f"System message: {system_message}")
         print("Creating chat session")
         vocal_model = create_model("strong", "openai")
         print("Vocal model created")
         silent_model = create_model("weak", "openai")
         print("Silent model created")
-        vocal_agent = create_agent("chat", vocal_model, preprompt, system_message)
+        vocal_agent = create_agent("chat", vocal_model, system_message)
         print("Vocal agent created")
-        silent_agent = create_agent("chat", silent_model, preprompt, system_message)
+        silent_agent = create_agent("chat", silent_model, system_message)
         print("Silent agent created")
         chat_session = ChatSession(silent_agent, vocal_agent)
         print(f"Chat session created with ID: {chat_session.session_id}")
