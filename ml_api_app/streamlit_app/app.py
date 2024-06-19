@@ -34,8 +34,24 @@ if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
 def display_messages():
-    for message in reversed(st.session_state["messages"]):
-        st.write(f"{message['role']}: {message['content']}")
+    st.markdown(
+        """
+        <style>
+        .message-container {
+            height: 800px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    with st.container():
+        st.markdown('<div class="message-container">', unsafe_allow_html=True)
+        for message in reversed(st.session_state["messages"]):
+            st.write(f"{message['role']}: {message['content']}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 def send_message_callback():
     st.session_state["send_message"] = True
