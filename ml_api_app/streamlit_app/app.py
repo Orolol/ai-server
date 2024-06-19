@@ -34,11 +34,13 @@ if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
 def display_messages():
-    for message in st.session_state["messages"]:
+    for message in reversed(st.session_state["messages"]):
         st.write(f"{message['role']}: {message['content']}")
 
 def send_message_callback():
     st.session_state["send_message"] = True
+
+display_messages()
 
 # User input
 user_input = st.text_input("You: ", st.session_state.get("user_input_reset", ""), key="user_input", on_change=send_message_callback)
@@ -53,5 +55,3 @@ if st.session_state.get("send_message"):
     else:
         st.error("Please enter a message")
     st.session_state["send_message"] = False
-
-display_messages()
