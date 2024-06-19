@@ -8,6 +8,7 @@ def start_chat_session():
     response = requests.post("http://localhost:5000/start_chat", json=data, headers={"Content-Type": "application/json"})
     if response.status_code == 200:
         return response.json()["chatsessionsid"]
+        st.session_state["user_input"] = ""
     else:
         st.error("Failed to start chat session")
         return None
