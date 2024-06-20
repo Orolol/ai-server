@@ -4,6 +4,7 @@ from app.utils.logger import ai_logger
 from jinja2 import Environment, FileSystemLoader
 import datetime
 import uuid
+import os
 
 
 class Agent(ABC):
@@ -52,7 +53,9 @@ class CodingAgent(Agent):
 
 class ChatAgent(Agent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
-        env = Environment(loader=FileSystemLoader('templates'))
+        # print the current path
+        print("current path: ", os.getcwd())
+        env = Environment(loader=FileSystemLoader('app/templates'))
         template = env.get_template('preprompt_template.jinja')
         self.preprompt = template.render()
         self.memory = LongTermMemory(memory_db_path)
