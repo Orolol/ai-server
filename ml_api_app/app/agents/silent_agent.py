@@ -6,14 +6,15 @@ import datetime
 from app.models.base_model import WeakModel
 from jinja2 import Environment, FileSystemLoader
 
+
 class SilentAgent:
     def __init__(self, memory_db_path="localhost", model_type="openai"):
         self.memory = LongTermMemory(memory_db_path)
 
         env = Environment(loader=FileSystemLoader('app/templates'))
         template = env.get_template('silent_agent_preprompt.jinja')
-        self.preprompt = template.render()
-        self.model = WeakModel(model_type, preprompt=self.preprompt)
+        self.preprompt = template.render({"date": datetime.datetime.now()})
+        self.model = WeakModel(model_type)
 
     def act(self, data):
         action = data.get("action")
@@ -31,7 +32,8 @@ class SilentAgent:
         # Implement the logic to search in the vectorial database
         # This is a placeholder implementation
         results = self.memory.search_interactions(search_terms, keywords, date)
-        ai_logger.info(f"{datetime.datetime.now()} - Memory search results: {results}")
+        ai_logger.info(
+            f"{datetime.datetime.now()} - Memory search results: {results}")
         return results
 
     def url_lookup_action(self, data):
@@ -43,13 +45,20 @@ class SilentAgent:
         text = soup.get_text()
         # Store the scraped content in the vector collection
         self.memory.store_interaction("url_lookup", text, [])
-        ai_logger.info(f"{datetime.datetime.now()} - URL lookup content stored: {text[:100]}...")  # Log first 100 chars
+        # Log first 100 chars
+        ai_logger.info(
+            f"{datetime.datetime.now()} - URL lookup content stored: {text[:100]}...")
         return text
+
     def analyze_message(self, message):
         """
         Analyze the user message to determine if any actions are needed.
         """
-        analysis_result = self.model.predict({"conversation_history": [{"role": "user", "content": message}]})
+        print('ANALYZE MESSAGE')
+        print("MESSAGE : ", message)
+        analysis_result = self.model.predict({"conversation_history": [
+                                             {"role": "user", "content": self.preprompt + " message : " + message}]})
+        print("ANALYSIS RESULT : ", analysis_result)
         if "search" in analysis_result.lower():
             return {"action": "Memory", "search_terms": message}
         elif "lookup" in analysis_result.lower():
