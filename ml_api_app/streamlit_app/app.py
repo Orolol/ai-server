@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 
+st.set_page_config(page_title="Chat with AI", page_icon=":robot_face:", layout="wide")
 st.title("Chat with AI")
 
 
@@ -99,18 +100,23 @@ user_input = st.text_input("You: ", st.session_state.get(
 display_messages()
 
 
-if st.session_state.get("send_message"):
-    if user_input:
-        response = send_message(st.session_state["chatsessionsid"], user_input)
-        if response:
-            st.session_state["messages"].append(
-                {"role": "user", "content": user_input})
-            if "response" in response:
+if __name__ == "__main__":
+    if st.session_state.get("send_message"):
+        if user_input:
+            response = send_message(st.session_state["chatsessionsid"], user_input)
+            if response:
                 st.session_state["messages"].append(
-                    {"role": "AI", "content": response["response"]})
-            else:
-                st.error("Unexpected response format")
-            st.session_state["user_input"] = ""
-    else:
-        st.error("Please enter a message")
-    st.session_state["send_message"] = False
+                    {"role": "user", "content": user_input})
+                if "response" in response:
+                    st.session_state["messages"].append(
+                        {"role": "AI", "content": response["response"]})
+                else:
+                    st.error("Unexpected response format")
+                st.session_state["user_input"] = ""
+        else:
+            st.error("Please enter a message")
+        st.session_state["send_message"] = False
+
+    # Run the Streamlit app on port 8502
+    st.experimental_set_query_params(port=8502)
+    st.experimental_rerun()
