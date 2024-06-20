@@ -4,12 +4,16 @@ from bs4 import BeautifulSoup
 import requests
 import datetime
 from app.models.base_model import WeakModel
+from jinja2 import Environment, FileSystemLoader
 
 class SilentAgent:
     def __init__(self, memory_db_path="localhost", model_type="openai"):
         self.memory = LongTermMemory(memory_db_path)
 
-        self.model = WeakModel(model_type)
+        env = Environment(loader=FileSystemLoader('app/templates'))
+        template = env.get_template('silent_agent_preprompt.jinja')
+        self.preprompt = template.render()
+        self.model = WeakModel(model_type, preprompt=self.preprompt)
 
     def act(self, data):
         action = data.get("action")
