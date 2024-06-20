@@ -41,7 +41,7 @@ def create_agent(agent_type, model, system_message=""):
 def start_chat():
     print("Received request to start chat")
     data = request.get_json()
-    print(f"Request data: {data}")
+    # print(f"Request data: {data}")
 
     system_message = data.get("system_message", "")
 
@@ -81,4 +81,4 @@ def send_message():
     chat_session = chat_sessions[chatsessionsid]
     response = chat_session.process_input(data)
     print(f"Chat session response: {response}")
-    return jsonify(response)
+    return jsonify({"response": response})
