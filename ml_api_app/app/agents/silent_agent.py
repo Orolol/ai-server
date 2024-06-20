@@ -38,3 +38,13 @@ class SilentAgent:
         self.memory.store_interaction("url_lookup", text, [])
         ai_logger.info(f"{datetime.datetime.now()} - URL lookup content stored: {text[:100]}...")  # Log first 100 chars
         return text
+    def analyze_message(self, message):
+        """
+        Analyze the user message to determine if any actions are needed.
+        """
+        if "search" in message.lower():
+            return {"action": "Memory", "search_terms": message}
+        elif "lookup" in message.lower():
+            return {"action": "URL_lookup", "url": message.split()[-1]}
+        else:
+            return {"action": "None"}
