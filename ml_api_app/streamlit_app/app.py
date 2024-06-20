@@ -67,7 +67,10 @@ if st.session_state.get("send_message"):
         response = send_message(st.session_state["chatsessionsid"], user_input)
         if response:
             st.session_state["messages"].append({"role": "user", "content": user_input})
-            st.session_state["messages"].append({"role": "AI", "content": response["response"]})
+            if "response" in response:
+                st.session_state["messages"].append({"role": "AI", "content": response["response"]})
+            else:
+                st.error("Unexpected response format")
             st.session_state["user_input"] = ""
     else:
         st.error("Please enter a message")
