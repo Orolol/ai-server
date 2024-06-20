@@ -14,7 +14,8 @@ class Agent(ABC):
 
 class CodingAgent(Agent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
-        print(f"Initializing CodingAgent with model: {model}, memory_db_path: {memory_db_path}, preprompt: {preprompt}, system_message: {system_message}")
+        print(
+            f"Initializing CodingAgent with model: {model}, memory_db_path: {memory_db_path}, preprompt: {preprompt}, system_message: {system_message}")
         env = Environment(loader=FileSystemLoader('templates'))
         template = env.get_template('preprompt_template.jinja')
         self.preprompt = template.render()
@@ -55,7 +56,8 @@ class ChatAgent(Agent):
         template = env.get_template('preprompt_template.jinja')
         self.preprompt = template.render()
         self.memory = LongTermMemory(memory_db_path)
-        self.conversation_history = [{"role": "system", "content": system_message}]
+        self.conversation_history = [
+            {"role": "system", "content": system_message}]
         self.model = model
         self.system_message = system_message
 
@@ -73,12 +75,13 @@ class ChatAgent(Agent):
 
 
 class ChatSession:
-    def __init__(self, silent_agent, vocal_agent, preprompt="", system_message=""):
+    def __init__(self, silent_agent, vocal_agent):
         self.session_id = str(uuid.uuid4())
         self.silent_agent = silent_agent
         self.vocal_agent = vocal_agent
 
     def process_input(self, data):
-        enriched_data = {"prompt": f"{self.silent_agent.preprompt} {data['prompt']}", "conversation_history": self.silent_agent.conversation_history}
+        enriched_data = {
+            "prompt": f"{self.silent_agent.preprompt} {data['prompt']}", "conversation_history": self.silent_agent.conversation_history}
         response = self.vocal_agent.act(enriched_data)
         return response
