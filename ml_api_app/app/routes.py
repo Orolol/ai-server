@@ -1,6 +1,7 @@
 from app.models.base_model import WeakModel, StrongModel
 from flask import request, jsonify, Blueprint
 from app.agents.base_agent import ChatAgent, CodingAgent, ChatSession
+from app.agents.silent_agent import SilentAgent
 import uuid
 
 # Store chat sessions
@@ -54,7 +55,7 @@ def start_chat():
         print("Silent model created")
         vocal_agent = create_agent("chat", vocal_model, system_message)
         print("Vocal agent created")
-        silent_agent = create_agent("chat", silent_model, system_message)
+        silent_agent = SilentAgent(memory_db_path="localhost", model_type="openai")
         print("Silent agent created")
         chat_session = ChatSession(silent_agent, vocal_agent)
         print(f"Chat session created with ID: {chat_session.session_id}")
@@ -64,7 +65,7 @@ def start_chat():
         return jsonify({"error": str(e)}), 400
     except Exception as e:
         print(f"Unexpected error: {e}")
-        return jsonify({"error": "Unexpected error occurred"}), 500
+        return jsonify({"error": f"Unexpected error occurred: {str(e)}"}), 500
 
     return jsonify({"chatsessionsid": chat_session.session_id})
 
