@@ -26,13 +26,23 @@ def send_message(chatsessionsid, prompt):
         st.error("Failed to send message")
         return None
 
-# Start a new chat session
+# Initialize session state variables
 if "chatsessionsid" not in st.session_state:
-    if st.button("Start Chat Session"):
-        st.session_state["chatsessionsid"] = start_chat_session()
+    st.session_state["chatsessionsid"] = None
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
+
+if "user_input" not in st.session_state:
+    st.session_state["user_input"] = ""
+
+if "send_message" not in st.session_state:
+    st.session_state["send_message"] = False
+
+# Start a new chat session
+if st.session_state["chatsessionsid"] is None:
+    if st.button("Start Chat Session"):
+        st.session_state["chatsessionsid"] = start_chat_session()
 
 def display_messages():
     st.markdown(
