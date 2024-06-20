@@ -64,11 +64,10 @@ def display_messages():
         """,
         unsafe_allow_html=True,
     )
-    with st.container():
-        st.markdown('<div class="message-container">', unsafe_allow_html=True)
-        for message in reversed(st.session_state["messages"]):
-            st.write(f"{message['role']}: {message['content']}")
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="message-container">', unsafe_allow_html=True)
+    for message in reversed(st.session_state["messages"]):
+        st.markdown(f"<p><strong>{message['role']}:</strong> {message['content']}</p>", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 def send_message_callback():
