@@ -2,6 +2,7 @@ from app.memory.long_term_memory import LongTermMemory
 from abc import ABC, abstractmethod
 from app.utils.logger import ai_logger
 from jinja2 import Environment, FileSystemLoader
+from app.agents.silent_agent import SilentAgent
 import datetime
 import uuid
 import os
