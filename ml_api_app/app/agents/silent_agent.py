@@ -3,10 +3,13 @@ from app.utils.logger import ai_logger
 from bs4 import BeautifulSoup
 import requests
 import datetime
+from app.models.base_model import WeakModel
 
 class SilentAgent:
-    def __init__(self, memory_db_path="localhost"):
+    def __init__(self, memory_db_path="localhost", model_type="openai"):
         self.memory = LongTermMemory(memory_db_path)
+
+        self.model = WeakModel(model_type)
 
     def act(self, data):
         action = data.get("action")
@@ -42,9 +45,10 @@ class SilentAgent:
         """
         Analyze the user message to determine if any actions are needed.
         """
-        if "search" in message.lower():
+        analysis_result = self.model.predict({"conversation_history": [{"role": "user", "content": message}]})
+        if "search" in analysis_result.lower():
             return {"action": "Memory", "search_terms": message}
-        elif "lookup" in message.lower():
+        elif "lookup" in analysis_result.lower():
             return {"action": "URL_lookup", "url": message.split()[-1]}
         else:
             return {"action": "None"}
