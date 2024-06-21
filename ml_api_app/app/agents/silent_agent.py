@@ -39,8 +39,11 @@ class SilentAgent:
     def url_lookup_action(self, data):
         print("URL LOOKUP ACTION", data)
         url = data.get("url")
+        query = data.get("query")
         if not url:
             raise ValueError("URL is required for URL_lookup action")
+        if not query:
+            raise ValueError("Query is required for URL_lookup action")
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
         text = soup.get_text()
@@ -50,7 +53,12 @@ class SilentAgent:
         # Log first 100 chars
         ai_logger.info(
             f"{datetime.datetime.now()} - URL lookup content stored: {text[:100]}...")
-        return text
+        
+        # Use the model to summarize the text using the query
+        summary_prompt = f"Summarize the following text in relation to this query: '{query}'\n\nText: {text}"
+        summary = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
+        
+        return summary
 
     def analyze_message(self, message):
         """
