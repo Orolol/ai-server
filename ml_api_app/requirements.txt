@@ -4,3 +4,5 @@ transformers
 chromadb
 python-dotenv
 streamlit
+anthropic
+deepseek
