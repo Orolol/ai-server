@@ -37,12 +37,14 @@ class SilentAgent:
         return results
 
     def url_lookup_action(self, data):
+        print("URL LOOKUP ACTION", data)
         url = data.get("url")
         if not url:
             raise ValueError("URL is required for URL_lookup action")
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
         text = soup.get_text()
+        print("URL LOOKUP TEXT : ", text)
         # Store the scraped content in the vector collection
         self.memory.store_interaction("url_lookup", text, [])
         # Log first 100 chars
@@ -59,9 +61,6 @@ class SilentAgent:
         analysis_result = self.model.predict({"conversation_history": [
                                              {"role": "user", "content": self.preprompt + " message : " + message}]})
         print("ANALYSIS RESULT : ", analysis_result)
-        if "search" in analysis_result.lower():
-            return {"action": "Memory", "search_terms": message}
-        elif "lookup" in analysis_result.lower():
-            return {"action": "URL_lookup", "url": message.split()[-1]}
-        else:
-            return {"action": "None"}
+
+        # We need to convert the string that is a JSON object into a python dict object
+        return eval(analysis_result)
