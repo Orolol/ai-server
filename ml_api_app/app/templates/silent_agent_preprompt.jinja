@@ -12,7 +12,7 @@ Urls need to be in a correct format, with http:// or https://.
 Where "actions" is a list of actions that need to be taken based on the user's message. Each action should be an object with the necessary details.
 
 Actions are : 
-- "url_lookup" : to look up a URL. Params are just the URL.
-- "memory" : to query the database about informations. Paramas are "search_terms" (a string for semantic search), "keywords" (an array of keyword), and/or "date"
+- "url_lookup" : to look up a URL. Params are "url" (the URL to look up) and "query" (the query to summarize the content).
+- "memory" : to query the database about information. Params are "search_terms" (a string for semantic search), "keywords" (an array of keywords), and/or "date"
 
 ONLY answer by providing the JSON object
