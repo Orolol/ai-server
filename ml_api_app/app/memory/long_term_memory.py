@@ -57,18 +57,23 @@ class LongTermMemory:
     def search_interactions(self, search_terms, keywords, date=None, n_results=10):
         try:
             query = " ".join(search_terms)
-            filter_criteria = {"keywords": {"$in": keywords}}
+            filter_criteria = {}
+
+            if keywords:
+                filter_criteria["keywords"] = {"$in": keywords}
 
             if date is not None:
-                filter_criteria["$and"] = [
-                    filter_criteria,
-                    {"date": {"$gte": date.isoformat()}}
-                ]
+                date_filter = {"date": {"$gte": date.isoformat()}}
+                if filter_criteria:
+                    filter_criteria = {"$and": [filter_criteria, date_filter]}
+                else:
+                    filter_criteria = date_filter
+
             print(query, filter_criteria)
             results = self.collection.query(
                 query_texts=[query],
                 n_results=n_results,
-                where=filter_criteria
+                where=filter_criteria if filter_criteria else None
             )
             logger.info(
                 f"Searched interactions with terms: {search_terms}, keywords: {keywords}, date: {date}")
