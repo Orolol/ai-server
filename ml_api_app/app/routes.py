@@ -43,21 +43,25 @@ def create_agent(agent_type, model, system_message=""):
 def start_chat():
     print("Received request to start chat")
     data = request.get_json()
-    # print(f"Request data: {data}")
+    print(f"Request data: {data}")
 
+    vocal_model_type = data.get("vocal_model_type", "strong")
+    vocal_model_name = data.get("vocal_model_name", "openai")
+    silent_model_type = data.get("silent_model_type", "weak")
+    silent_model_name = data.get("silent_model_name", "openai")
     system_message = data.get("system_message", "")
 
     try:
         print(f"System message: {system_message}")
         print("Creating chat session")
-        vocal_model = create_model("strong", "openai")
-        print("Vocal model created")
-        silent_model = create_model("weak", "openai")
-        print("Silent model created")
+        vocal_model = create_model(vocal_model_type, vocal_model_name)
+        print(f"Vocal model created: {vocal_model_type} - {vocal_model_name}")
+        silent_model = create_model(silent_model_type, silent_model_name)
+        print(f"Silent model created: {silent_model_type} - {silent_model_name}")
         vocal_agent = create_agent("chat", vocal_model, system_message)
         print("Vocal agent created")
         silent_agent = SilentAgent(
-            memory_db_path="localhost", model_type="openai")
+            memory_db_path="localhost", model_type=silent_model_name)
         print("Silent agent created")
         chat_session = ChatSession(silent_agent, vocal_agent)
         print(f"Chat session created with ID: {chat_session.session_id}")

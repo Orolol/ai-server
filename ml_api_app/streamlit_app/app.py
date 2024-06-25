@@ -4,14 +4,12 @@ import requests
 st.title("Chat with AI")
 
 
-def start_chat_session():
-    data = {}
+def start_chat_session(params):
     response = requests.post("http://localhost:5000/start_chat",
-                             json=data, headers={"Content-Type": "application/json"})
+                             json=params, headers={"Content-Type": "application/json"})
     if response.status_code == 200:
         st.session_state["user_input"] = ""
         return response.json()["chatsessionsid"]
-        st.session_state["user_input"] = ""
     else:
         st.error("Failed to start chat session")
         return None
@@ -46,8 +44,25 @@ if "send_message" not in st.session_state:
 
 # Start a new chat session
 if st.session_state["chatsessionsid"] is None:
+    st.subheader("Chat Session Parameters")
+    col1, col2 = st.columns(2)
+    with col1:
+        vocal_model_type = st.selectbox("Vocal Model Type", ["strong", "weak"], index=0)
+        vocal_model_name = st.text_input("Vocal Model Name", "openai")
+    with col2:
+        silent_model_type = st.selectbox("Silent Model Type", ["strong", "weak"], index=1)
+        silent_model_name = st.text_input("Silent Model Name", "openai")
+    system_message = st.text_area("System Message", "")
+    
     if st.button("Start Chat Session"):
-        st.session_state["chatsessionsid"] = start_chat_session()
+        params = {
+            "vocal_model_type": vocal_model_type,
+            "vocal_model_name": vocal_model_name,
+            "silent_model_type": silent_model_type,
+            "silent_model_name": silent_model_name,
+            "system_message": system_message
+        }
+        st.session_state["chatsessionsid"] = start_chat_session(params)
 
 
 def display_messages():
