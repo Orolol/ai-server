@@ -54,15 +54,21 @@ class LongTermMemory:
                 f"Failed to retrieve interactions - {str(e)}", exc_info=True)
             raise
 
-    def search_interactions(self, query, n_results=10, filter_criteria=None):
+    def search_interactions(self, search_terms, keywords, date, n_results=10):
         try:
-            where = filter_criteria if filter_criteria else {}
+            query = " ".join(search_terms)
+            filter_criteria = {
+                "$and": [
+                    {"keywords": {"$in": keywords}},
+                    {"date": {"$gte": date.isoformat()}}
+                ]
+            }
             results = self.collection.query(
                 query_texts=[query],
                 n_results=n_results,
-                where=where
+                where=filter_criteria
             )
-            logger.info(f"Searched interactions with query: {query}, filter: {filter_criteria}")
+            logger.info(f"Searched interactions with terms: {search_terms}, keywords: {keywords}, date: {date}")
             return results
         except Exception as e:
             logger.error(
