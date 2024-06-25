@@ -1,6 +1,7 @@
 from app.models.base_model import WeakModel, StrongModel
 from flask import request, jsonify, Blueprint
-from app.agents.base_agent import ChatAgent, CodingAgent, ChatSession
+from app.agents.base_agent import ChatAgent, CodingAgent
+from app.agents.chat_session import ChatSession
 from app.agents.silent_agent import SilentAgent
 import uuid
 
@@ -55,7 +56,8 @@ def start_chat():
         print("Silent model created")
         vocal_agent = create_agent("chat", vocal_model, system_message)
         print("Vocal agent created")
-        silent_agent = SilentAgent(memory_db_path="localhost", model_type="openai")
+        silent_agent = SilentAgent(
+            memory_db_path="localhost", model_type="openai")
         print("Silent agent created")
         chat_session = ChatSession(silent_agent, vocal_agent)
         print(f"Chat session created with ID: {chat_session.session_id}")

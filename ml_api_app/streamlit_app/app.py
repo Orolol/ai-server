@@ -59,15 +59,18 @@ def display_messages():
             overflow-y: scroll;
             border: 1px solid #ccc;
             padding: 10px;
+            display: flex;
+            flex-direction: column-reverse;
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
-    st.markdown('<div class="message-container">', unsafe_allow_html=True)
-    for message in reversed(st.session_state["messages"]):
-        st.markdown(f"<p><strong>{message['role']}:</strong> {message['content']}</p>", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    messages_html = '<div class="message-container">'
+    for message in st.session_state["messages"]:
+        messages_html += f"<p><strong>{message['role']}:</strong> {message['content']}</p>"
+    messages_html += '</div>'
+    st.markdown(messages_html, unsafe_allow_html=True)
 
 
 def send_message_callback():
@@ -91,11 +94,11 @@ def send_message_callback():
         st.session_state["send_message"] = False
 
 
+display_messages()
+
 # User input
 user_input = st.text_input("You: ", st.session_state.get(
     "user_input_reset", ""), key="user_input", on_change=send_message_callback)
-
-display_messages()
 
 
 if st.session_state.get("send_message"):
