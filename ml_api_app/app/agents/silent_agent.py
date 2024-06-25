@@ -47,18 +47,18 @@ class SilentAgent:
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
         text = soup.get_text()
-        print("URL LOOKUP TEXT : ", text)
-        
+
         # Use the model to summarize the text using the query
         summary_prompt = f"Summarize the following text in relation to this query: '{query}'\n\nText: {text}"
-        summary = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
-        
+        summary = self.model.predict(
+            {"conversation_history": [{"role": "user", "content": summary_prompt}]})
+
         # Store the summarized content in the vector collection
         self.memory.store_interaction("url_lookup", summary, [])
         # Log first 100 chars of the summary
         ai_logger.info(
             f"{datetime.datetime.now()} - URL lookup summary stored: {summary[:100]}...")
-        
+
         return summary
 
     def analyze_message(self, message):
