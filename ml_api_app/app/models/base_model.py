@@ -3,12 +3,14 @@ import os
 from anthropic import Anthropic
 from transformers import pipeline
 from openai import OpenAI
-from ml_api_app.config.config import Config
+from config.config import Config
+
 
 class Model(ABC):
     @abstractmethod
     def predict(self, data):
         pass
+
 
 class OpenAIModel(Model):
     def __init__(self, model_name, **kwargs):
@@ -24,6 +26,7 @@ class OpenAIModel(Model):
         )
         return chat_completion.choices[0].message.content.strip()
 
+
 class AnthropicModel(Model):
     def __init__(self, model_name, **kwargs):
         self.client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
@@ -33,10 +36,12 @@ class AnthropicModel(Model):
     def predict(self, data):
         response = self.client.completions.create(
             model=self.model_name,
-            prompt="\n\n".join([f"{m['role']}: {m['content']}" for m in data["conversation_history"]]),
+            prompt="\n\n".join(
+                [f"{m['role']}: {m['content']}" for m in data["conversation_history"]]),
             **self.kwargs
         )
         return response.completion
+
 
 class HuggingFaceModel(Model):
     def __init__(self, model_name, **kwargs):
@@ -44,16 +49,19 @@ class HuggingFaceModel(Model):
         self.kwargs = kwargs
 
     def predict(self, data):
-        prompt = "\n".join([f"{m['role']}: {m['content']}" for m in data["conversation_history"]])
+        prompt = "\n".join(
+            [f"{m['role']}: {m['content']}" for m in data["conversation_history"]])
         response = self.model(prompt, **self.kwargs)
         return response[0]['generated_text']
+
 
 class ModelFactory:
     @staticmethod
     def create_model(provider, strength):
         config = Config.AI_PROVIDERS[provider]
         model_name = config[f"{strength}_model"]
-        model_params = {k: v for k, v in config.items() if k not in ["weak_model", "strong_model"]}
+        model_params = {k: v for k, v in config.items() if k not in [
+            "weak_model", "strong_model"]}
 
         if provider == "openai":
             return OpenAIModel(model_name, **model_params)
