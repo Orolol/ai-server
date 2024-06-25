@@ -42,8 +42,14 @@ if "user_input" not in st.session_state:
 if "send_message" not in st.session_state:
     st.session_state["send_message"] = False
 
+if "chat_started" not in st.session_state:
+    st.session_state["chat_started"] = False
+
+if "chat_params" not in st.session_state:
+    st.session_state["chat_params"] = {}
+
 # Start a new chat session
-if st.session_state["chatsessionsid"] is None:
+if not st.session_state["chat_started"]:
     st.subheader("Chat Session Parameters")
     col1, col2 = st.columns(2)
     with col1:
@@ -61,7 +67,13 @@ if st.session_state["chatsessionsid"] is None:
             "system_message": system_message
         }
         st.session_state["chatsessionsid"] = start_chat_session(params)
+        if st.session_state["chatsessionsid"]:
+            st.session_state["chat_started"] = True
+            st.session_state["chat_params"] = params
+            st.experimental_rerun()
 
+if st.session_state["chat_started"]:
+    st.info(f"You're chatting with {st.session_state['chat_params']['ai_provider']} model with temperature {st.session_state['chat_params']['temperature']} and max length {st.session_state['chat_params']['max_length']}")
 
 def display_messages():
     st.markdown(
