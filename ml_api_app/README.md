@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a Python-based Machine Learning/AI API application. It supports both online models from OpenAI and local models from Hugging Face. The application is designed to be modular and extensible, with a focus on ease of use and flexibility.
+This project is a Python-based Machine Learning/AI API application. It supports multiple AI providers including OpenAI, Anthropic, and DeepSeek. The application features a long-term memory system, a silent agent for background processing, and a Streamlit-based user interface. It is designed to be modular, extensible, and easy to use.
 
 ## Folder Structure
 
@@ -12,6 +12,8 @@ ml_api_app/
 ├── app/
 │   ├── agents/
 │   │   ├── base_agent.py
+│   │   ├── chat_session.py
+│   │   ├── silent_agent.py
 │   ├── memory/
 │   │   ├── long_term_memory.py
 │   ├── models/
@@ -21,11 +23,15 @@ ml_api_app/
 │   ├── utils/
 │   │   ├── preprocess.py
 │   │   ├── postprocess.py
+│   │   ├── logger.py
+│   ├── templates/
+│   │   ├── silent_agent_preprompt.jinja
 │   ├── __init__.py
 │   ├── main.py
 │
 ├── config/
 │   ├── config.py
+│   ├── ai_providers_config.py
 │   ├── __init__.py
 │
 ├── data/
@@ -36,6 +42,9 @@ ml_api_app/
 │   ├── test_main.py
 │   ├── test_model.py
 │   ├── __init__.py
+│
+├── streamlit_app/
+│   ├── app.py
 │
 ├── requirements.txt
 ├── setup.py
@@ -64,9 +73,13 @@ ml_api_app/
    ```
 
 4. **Set up environment variables:**
-   Create a `.env` file in the root directory and add your OpenAI API key:
+   Create a `.env` file in the root directory and add your API keys:
    ```sh
-   echo "OPENAI_API_KEY=your_openai_api_key" > .env
+   OPENAI_API_KEY=your_openai_api_key
+   ANTHROPIC_API_KEY=your_anthropic_api_key
+   DEEPSEEK_API_KEY=your_deepseek_api_key
+   CHROMADB_HOST=your_chromadb_host
+   CHROMADB_PORT=your_chromadb_port
    ```
 
 5. **Run the application:**
@@ -82,27 +95,23 @@ To run the Streamlit frontend, use the following command:
 streamlit run ml_api_app/streamlit_app/app.py
 ```
 
+## Features
+
+- Multi-provider support (OpenAI, Anthropic, DeepSeek)
+- Long-term memory system using ChromaDB
+- Silent agent for background processing
+- Chat sessions with conversation history
+- Streamlit-based user interface
+- Configurable AI provider settings
+
 ## Usage
 
-### API Endpoints
-
-- **POST /predict**
-  - **Description:** Predict using the specified model and agent.
-  - **Request Body:**
-    ```json
-    {
-      "data": "your input data",
-      "model_type": "openai" or "huggingface",
-      "model_name_or_key": "model name or API key",
-      "agent_type": "coding" or "chat"
-    }
-    ```
-  - **Response:**
-    ```json
-    {
-      "prediction": "model prediction"
-    }
-    ```
+The Streamlit interface allows users to:
+- Start new chat sessions
+- Send messages to the AI
+- View conversation history
+- Clear the long-term memory
+- Configure AI provider and model strength
 
 ## License
 
