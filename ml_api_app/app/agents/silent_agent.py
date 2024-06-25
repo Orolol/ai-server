@@ -6,7 +6,7 @@ import datetime
 from app.models.base_model import ModelFactory, Model
 from jinja2 import Environment, FileSystemLoader
 import json
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 
 class SilentAgent:
@@ -18,21 +18,19 @@ class SilentAgent:
         self.preprompt = template.render({"date": datetime.datetime.now()})
         self.model: Model = ModelFactory.create_model(ai_provider, strength)
 
-    def act(self, data):
+    def act(self, data: Dict[str, Any]) -> Any:
         action = data.get("action")
         if action == "Memory":
             return self.memory_action(data)
         elif action == "URL_lookup":
             return self.url_lookup_action(data)
         else:
-            raise ValueError("Unknown action")
+            raise ValueError(f"Unknown action: {action}")
 
-    def memory_action(self, data):
+    def memory_action(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
         search_terms = data.get("search_terms", "")
         keywords = data.get("keywords", [])
-        date = data.get("date", None)
-        # Implement the logic to search in the vectorial database
-        # This is a placeholder implementation
+        date = data.get("date")
         results = self.memory.search_interactions(search_terms, keywords, date)
         ai_logger.info(
             f"{datetime.datetime.now()} - Memory search results: {results}")
@@ -50,11 +48,9 @@ class SilentAgent:
         soup = BeautifulSoup(response.content, 'html.parser')
         text = soup.get_text()
 
-        # Use the model to summarize the text using the query
         summary_prompt = f"Summarize the following text in relation to this query: '{query}'\n\nText: {text}"
-        summary = self.model.predict([{"role": "user", "content": summary_prompt}])
+        summary = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
 
-        # Store the summarized content in the vector collection
         self.memory.store_interaction("url_lookup", summary, [])
         ai_logger.info(f"URL lookup summary stored: {summary[:100]}...")
 
@@ -65,13 +61,14 @@ class SilentAgent:
         Analyze the user message to determine if any actions are needed.
         """
         ai_logger.info(f"Analyzing message: {message[:50]}...")
-        analysis_result = self.model.predict([
-            {"role": "system", "content": self.preprompt},
-            {"role": "user", "content": f"Analyze this message: {message}"}
-        ])
+        analysis_result = self.model.predict({
+            "conversation_history": [
+                {"role": "system", "content": self.preprompt},
+                {"role": "user", "content": f"Analyze this message: {message}"}
+            ]
+        })
         ai_logger.info(f"Analysis result: {analysis_result[:100]}...")
 
-        # Convert the JSON string to a Python dictionary
         try:
             return json.loads(analysis_result)
         except json.JSONDecodeError:
