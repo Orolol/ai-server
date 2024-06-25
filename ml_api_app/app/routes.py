@@ -1,9 +1,9 @@
-from app.models.base_model import WeakModel, StrongModel
 from flask import request, jsonify, Blueprint
 from app.agents.base_agent import ChatAgent, CodingAgent
 from app.agents.chat_session import ChatSession
 from app.agents.silent_agent import SilentAgent
-import uuid
+from app.models.base_model import ModelFactory
+from app.config.ai_providers_config import ai_providers_config
 
 # Store chat sessions
 chat_sessions = {}
@@ -14,19 +14,6 @@ routes = Blueprint('routes', __name__)
 def init_routes(app):
     print("Initializing routes")
     app.register_blueprint(routes)
-
-
-def create_model(model_type, model_name_or_key):
-    print(
-        f"Creating model of type: {model_type} with key: {model_name_or_key}")
-    if model_type == "openai":
-        return WeakModel("openai")
-    elif model_type == "weak":
-        return WeakModel(model_name_or_key)
-    elif model_type == "strong":
-        return StrongModel(model_name_or_key)
-    else:
-        raise ValueError("Invalid model type")
 
 
 def create_agent(agent_type, model, system_message=""):
@@ -46,19 +33,17 @@ def start_chat():
     print(f"Request data: {data}")
 
     ai_provider = data.get("ai_provider", "openai")
-    temperature = data.get("temperature", 0.7)
-    max_length = data.get("max_length", 1024)
+    strength = data.get("strength", "weak")
     system_message = data.get("system_message", "")
 
     try:
         print(f"System message: {system_message}")
         print("Creating chat session")
-        model = create_model(ai_provider, temperature=temperature, max_length=max_length)
-        print(f"Model created: {ai_provider}")
+        model = ModelFactory.create_model(ai_provider, strength)
+        print(f"Model created: {ai_provider} ({strength})")
         vocal_agent = create_agent("chat", model, system_message)
         print("Vocal agent created")
-        silent_agent = SilentAgent(
-            memory_db_path="localhost", model_type=ai_provider)
+        silent_agent = SilentAgent(memory_db_path="localhost", model_type=ai_provider)
         print("Silent agent created")
         chat_session = ChatSession(silent_agent, vocal_agent)
         print(f"Chat session created with ID: {chat_session.session_id}")
