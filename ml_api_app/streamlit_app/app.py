@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+from ml_api_app.config.ai_providers_config import ai_providers_config
 
 st.title("Chat with AI")
 
@@ -53,10 +54,17 @@ if not st.session_state["chat_started"]:
     st.subheader("Chat Session Parameters")
     col1, col2 = st.columns(2)
     with col1:
-        ai_provider = st.selectbox("AI Provider", ["openai", "anthropic", "huggingface"], index=0)
+        ai_provider = st.selectbox("AI Provider", list(ai_providers_config.keys()), index=0)
         temperature = st.slider("Temperature", 0.0, 1.0, 0.7, 0.1)
     with col2:
         max_length = st.number_input("Max Length", min_value=1, max_value=4096, value=1024, step=1)
+    
+    weak_model = ai_providers_config[ai_provider]["weak_model"]
+    strong_model = ai_providers_config[ai_provider]["strong_model"]
+    
+    st.info(f"Weak model: {weak_model}")
+    st.info(f"Strong model: {strong_model}")
+    
     system_message = st.text_area("System Message", "")
     
     if st.button("Start Chat Session"):
@@ -73,7 +81,10 @@ if not st.session_state["chat_started"]:
             st.experimental_rerun()
 
 if st.session_state["chat_started"]:
-    st.info(f"You're chatting with {st.session_state['chat_params']['ai_provider']} model with temperature {st.session_state['chat_params']['temperature']} and max length {st.session_state['chat_params']['max_length']}")
+    ai_provider = st.session_state['chat_params']['ai_provider']
+    weak_model = ai_providers_config[ai_provider]["weak_model"]
+    strong_model = ai_providers_config[ai_provider]["strong_model"]
+    st.info(f"You're chatting with {ai_provider} provider. Weak model: {weak_model}, Strong model: {strong_model}. Temperature: {st.session_state['chat_params']['temperature']}, Max length: {st.session_state['chat_params']['max_length']}")
 
 def display_messages():
     st.markdown(
