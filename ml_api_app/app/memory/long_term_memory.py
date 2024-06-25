@@ -58,19 +58,20 @@ class LongTermMemory:
         try:
             query = " ".join(search_terms)
             filter_criteria = {"keywords": {"$in": keywords}}
-            
+
             if date is not None:
                 filter_criteria["$and"] = [
                     filter_criteria,
                     {"date": {"$gte": date.isoformat()}}
                 ]
-            
+            print(query, filter_criteria)
             results = self.collection.query(
                 query_texts=[query],
                 n_results=n_results,
                 where=filter_criteria
             )
-            logger.info(f"Searched interactions with terms: {search_terms}, keywords: {keywords}, date: {date}")
+            logger.info(
+                f"Searched interactions with terms: {search_terms}, keywords: {keywords}, date: {date}")
             return results
         except Exception as e:
             logger.error(
