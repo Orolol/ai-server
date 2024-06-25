@@ -3,19 +3,20 @@ from app.utils.logger import ai_logger
 from bs4 import BeautifulSoup
 import requests
 import datetime
-from app.models.base_model import ModelFactory
+from app.models.base_model import ModelFactory, Model
 from jinja2 import Environment, FileSystemLoader
 import json
+from typing import Dict, Any
 
 
 class SilentAgent:
-    def __init__(self, memory_db_path="localhost", ai_provider="openai", strength="weak"):
+    def __init__(self, memory_db_path: str = "localhost", ai_provider: str = "openai", strength: str = "weak"):
         self.memory = LongTermMemory(memory_db_path)
 
         env = Environment(loader=FileSystemLoader('app/templates'))
         template = env.get_template('silent_agent_preprompt.jinja')
         self.preprompt = template.render({"date": datetime.datetime.now()})
-        self.model = ModelFactory.create_model(ai_provider, strength)
+        self.model: Model = ModelFactory.create_model(ai_provider, strength)
 
     def act(self, data):
         action = data.get("action")
@@ -37,7 +38,7 @@ class SilentAgent:
             f"{datetime.datetime.now()} - Memory search results: {results}")
         return results
 
-    def url_lookup_action(self, data):
+    def url_lookup_action(self, data: Dict[str, Any]) -> str:
         ai_logger.info(f"URL lookup action initiated with data: {data}")
         url = data.get("url")
         query = data.get("query")
@@ -59,7 +60,7 @@ class SilentAgent:
 
         return summary
 
-    def analyze_message(self, message):
+    def analyze_message(self, message: str) -> Dict[str, Any]:
         """
         Analyze the user message to determine if any actions are needed.
         """
