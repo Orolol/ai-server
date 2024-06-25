@@ -3,6 +3,7 @@ from app.agents.base_agent import ChatAgent, CodingAgent
 from app.agents.chat_session import ChatSession
 from app.agents.silent_agent import SilentAgent
 from app.models.base_model import ModelFactory
+from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
 
 # Store chat sessions
@@ -74,3 +75,12 @@ def send_message():
     response = chat_session.process_input(data)
     print(f"Chat session response: {response}")
     return jsonify({"response": response})
+
+@routes.route('/clear_memory', methods=['POST'])
+def clear_memory():
+    try:
+        memory = LongTermMemory()
+        memory.clear_memory()
+        return jsonify({"message": "Memory cleared successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to clear memory: {str(e)}"}), 500

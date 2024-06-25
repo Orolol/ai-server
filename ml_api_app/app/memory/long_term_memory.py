@@ -82,3 +82,11 @@ class LongTermMemory:
             logger.error(
                 f"Failed to search interactions - {str(e)}", exc_info=True)
             raise
+
+    def clear_memory(self):
+        try:
+            self.collection.delete(where={})
+            logger.info("Cleared all interactions from the memory")
+        except Exception as e:
+            logger.error(f"Failed to clear memory - {str(e)}", exc_info=True)
+            raise

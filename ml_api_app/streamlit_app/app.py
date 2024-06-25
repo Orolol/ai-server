@@ -136,7 +136,6 @@ display_messages()
 user_input = st.text_input("You: ", st.session_state.get(
     "user_input_reset", ""), key="user_input", on_change=send_message_callback)
 
-
 if st.session_state.get("send_message"):
     if user_input:
         response = send_message(st.session_state["chatsessionsid"], user_input)
@@ -152,3 +151,11 @@ if st.session_state.get("send_message"):
     else:
         st.error("Please enter a message")
     st.session_state["send_message"] = False
+
+# Clear memory button
+if st.button("Clear Memory"):
+    response = requests.post("http://localhost:5000/clear_memory")
+    if response.status_code == 200:
+        st.success("Memory cleared successfully")
+    else:
+        st.error(f"Failed to clear memory: {response.json().get('error', 'Unknown error')}")
