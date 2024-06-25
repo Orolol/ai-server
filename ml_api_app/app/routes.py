@@ -3,7 +3,7 @@ from app.agents.base_agent import ChatAgent, CodingAgent
 from app.agents.chat_session import ChatSession
 from app.agents.silent_agent import SilentAgent
 from app.models.base_model import ModelFactory
-from app.config.ai_providers_config import ai_providers_config
+from config.ai_providers_config import ai_providers_config
 
 # Store chat sessions
 chat_sessions = {}
@@ -33,17 +33,20 @@ def start_chat():
     print(f"Request data: {data}")
 
     ai_provider = data.get("ai_provider", "openai")
-    strength = data.get("strength", "weak")
     system_message = data.get("system_message", "")
 
     try:
         print(f"System message: {system_message}")
         print("Creating chat session")
-        model = ModelFactory.create_model(ai_provider, strength)
-        print(f"Model created: {ai_provider} ({strength})")
-        vocal_agent = create_agent("chat", model, system_message)
+        strong_model = ModelFactory.create_model(ai_provider, "strong")
+        print(
+            f"Model created: {ai_provider} (strong) {strong_model.model_name}")
+        weak_model = ModelFactory.create_model(ai_provider, "weak")
+        print(f"Model created: {ai_provider} (weak) {weak_model.model_name}")
+        vocal_agent = create_agent("chat", strong_model, system_message)
         print("Vocal agent created")
-        silent_agent = SilentAgent(memory_db_path="localhost", model_type=ai_provider)
+        silent_agent = SilentAgent(
+            memory_db_path="localhost", ai_provider=ai_provider, strength="weak")
         print("Silent agent created")
         chat_session = ChatSession(silent_agent, vocal_agent)
         print(f"Chat session created with ID: {chat_session.session_id}")
