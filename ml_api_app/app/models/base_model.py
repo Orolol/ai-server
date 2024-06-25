@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 import os
 from anthropic import Anthropic
-from deepseek import DeepSeek
+# from deepseek import DeepSeek
+from transformers import pipeline
 
 
 class Model(ABC):
@@ -36,12 +37,14 @@ class AnthropicModel(Model):
     def predict(self, data):
         response = self.client.completions.create(
             model="claude-2",
-            prompt="\n\n".join([f"{m['role']}: {m['content']}" for m in data["conversation_history"]]),
+            prompt="\n\n".join(
+                [f"{m['role']}: {m['content']}" for m in data["conversation_history"]]),
             max_tokens_to_sample=1000
         )
         return response.completion
 
 
+""" 
 class DeepSeekModel(Model):
     def __init__(self, api_key):
         self.client = DeepSeek(api_key=os.environ.get("DEEPSEEK_API_KEY"))
@@ -51,7 +54,7 @@ class DeepSeekModel(Model):
             model="deepseek-chat",
             messages=data["conversation_history"]
         )
-        return response.choices[0].message.content
+        return response.choices[0].message.content """
 
 
 class WeakModel(Model):
@@ -59,12 +62,11 @@ class WeakModel(Model):
         if model_type == "openai":
             self.model = OpenAIModel(api_key=os.getenv("OPENAI_API_KEY"))
         elif model_type == "huggingface":
-            from transformers import pipeline
             self.model = pipeline("text-generation", model="phi-3-mini")
         elif model_type == "anthropic":
             self.model = AnthropicModel(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        elif model_type == "deepseek":
-            self.model = DeepSeekModel(api_key=os.getenv("DEEPSEEK_API_KEY"))
+        # elif model_type == "deepseek":
+        #     self.model = DeepSeekModel(api_key=os.getenv("DEEPSEEK_API_KEY"))
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
 
@@ -77,12 +79,11 @@ class StrongModel(Model):
         if model_type == "openai":
             self.model = OpenAIModel(api_key=os.getenv("OPENAI_API_KEY"))
         elif model_type == "huggingface":
-            from transformers import pipeline
             self.model = pipeline("text-generation", model="Llama3-70b")
         elif model_type == "anthropic":
             self.model = AnthropicModel(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        elif model_type == "deepseek":
-            self.model = DeepSeekModel(api_key=os.getenv("DEEPSEEK_API_KEY"))
+        # elif model_type == "deepseek":
+        #    self.model = DeepSeekModel(api_key=os.getenv("DEEPSEEK_API_KEY"))
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
 
