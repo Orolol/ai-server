@@ -53,3 +53,18 @@ class LongTermMemory:
             logger.error(
                 f"Failed to retrieve interactions - {str(e)}", exc_info=True)
             raise
+
+    def search_interactions(self, query, n_results=10, filter_criteria=None):
+        try:
+            where = filter_criteria if filter_criteria else {}
+            results = self.collection.query(
+                query_texts=[query],
+                n_results=n_results,
+                where=where
+            )
+            logger.info(f"Searched interactions with query: {query}, filter: {filter_criteria}")
+            return results
+        except Exception as e:
+            logger.error(
+                f"Failed to search interactions - {str(e)}", exc_info=True)
+            raise
