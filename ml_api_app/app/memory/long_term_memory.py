@@ -85,8 +85,15 @@ class LongTermMemory:
 
     def clear_memory(self):
         try:
-            self.collection.delete(where={})
-            logger.info("Cleared all interactions from the memory")
+            # Get all document IDs
+            all_ids = self.collection.get()["ids"]
+            
+            # Delete all documents using their IDs
+            if all_ids:
+                self.collection.delete(ids=all_ids)
+                logger.info(f"Cleared {len(all_ids)} interactions from the memory")
+            else:
+                logger.info("No interactions to clear from the memory")
         except Exception as e:
             logger.error(f"Failed to clear memory - {str(e)}", exc_info=True)
             raise
