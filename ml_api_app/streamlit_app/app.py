@@ -47,19 +47,17 @@ if st.session_state["chatsessionsid"] is None:
     st.subheader("Chat Session Parameters")
     col1, col2 = st.columns(2)
     with col1:
-        vocal_model_type = st.selectbox("Vocal Model Type", ["strong", "weak"], index=0)
-        vocal_model_name = st.text_input("Vocal Model Name", "openai")
+        ai_provider = st.selectbox("AI Provider", ["openai", "anthropic", "huggingface"], index=0)
+        temperature = st.slider("Temperature", 0.0, 1.0, 0.7, 0.1)
     with col2:
-        silent_model_type = st.selectbox("Silent Model Type", ["strong", "weak"], index=1)
-        silent_model_name = st.text_input("Silent Model Name", "openai")
+        max_length = st.number_input("Max Length", min_value=1, max_value=4096, value=1024, step=1)
     system_message = st.text_area("System Message", "")
     
     if st.button("Start Chat Session"):
         params = {
-            "vocal_model_type": vocal_model_type,
-            "vocal_model_name": vocal_model_name,
-            "silent_model_type": silent_model_type,
-            "silent_model_name": silent_model_name,
+            "ai_provider": ai_provider,
+            "temperature": temperature,
+            "max_length": max_length,
             "system_message": system_message
         }
         st.session_state["chatsessionsid"] = start_chat_session(params)
