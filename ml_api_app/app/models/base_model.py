@@ -1,91 +1,71 @@
 from abc import ABC, abstractmethod
 import os
 from anthropic import Anthropic
-# from deepseek import DeepSeek
 from transformers import pipeline
-
+from openai import OpenAI
+from ml_api_app.config.config import Config
 
 class Model(ABC):
     @abstractmethod
     def predict(self, data):
         pass
 
-
 class OpenAIModel(Model):
-    def __init__(self, api_key):
-        import os
-        from openai import OpenAI
-
-        self.client = OpenAI(
-            api_key=os.environ.get("OPENAI_API_KEY"),
-        )
+    def __init__(self, model_name, temperature, max_tokens):
+        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        self.model_name = model_name
+        self.temperature = temperature
+        self.max_tokens = max_tokens
 
     def predict(self, data):
         chat_completion = self.client.chat.completions.create(
             messages=data["conversation_history"],
-            model="gpt-4",
+            model=self.model_name,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
         )
-
-        response = chat_completion.choices[0].message.content.strip()
-        return response
-
+        return chat_completion.choices[0].message.content.strip()
 
 class AnthropicModel(Model):
-    def __init__(self, api_key):
+    def __init__(self, model_name, temperature, max_tokens):
         self.client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        self.model_name = model_name
+        self.temperature = temperature
+        self.max_tokens = max_tokens
 
     def predict(self, data):
         response = self.client.completions.create(
-            model="claude-2",
-            prompt="\n\n".join(
-                [f"{m['role']}: {m['content']}" for m in data["conversation_history"]]),
-            max_tokens_to_sample=1000
+            model=self.model_name,
+            prompt="\n\n".join([f"{m['role']}: {m['content']}" for m in data["conversation_history"]]),
+            max_tokens_to_sample=self.max_tokens,
+            temperature=self.temperature,
         )
         return response.completion
 
-
-""" 
-class DeepSeekModel(Model):
-    def __init__(self, api_key):
-        self.client = DeepSeek(api_key=os.environ.get("DEEPSEEK_API_KEY"))
+class HuggingFaceModel(Model):
+    def __init__(self, model_name, temperature, max_length):
+        self.model = pipeline("text-generation", model=model_name)
+        self.temperature = temperature
+        self.max_length = max_length
 
     def predict(self, data):
-        response = self.client.chat.completions.create(
-            model="deepseek-chat",
-            messages=data["conversation_history"]
-        )
-        return response.choices[0].message.content """
+        prompt = "\n".join([f"{m['role']}: {m['content']}" for m in data["conversation_history"]])
+        response = self.model(prompt, max_length=self.max_length, temperature=self.temperature)
+        return response[0]['generated_text']
 
+class ModelFactory:
+    @staticmethod
+    def create_model(provider, strength):
+        config = Config.AI_PROVIDERS[provider]
+        model_name = config[f"{strength}_model"]
+        temperature = config["temperature"]
+        max_tokens = config.get("max_tokens") or config.get("max_length")
 
-class WeakModel(Model):
-    def __init__(self, model_type):
-        if model_type == "openai":
-            self.model = OpenAIModel(api_key=os.getenv("OPENAI_API_KEY"))
-        elif model_type == "huggingface":
-            self.model = pipeline("text-generation", model="phi-3-mini")
-        elif model_type == "anthropic":
-            self.model = AnthropicModel(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        # elif model_type == "deepseek":
-        #     self.model = DeepSeekModel(api_key=os.getenv("DEEPSEEK_API_KEY"))
+        if provider == "openai":
+            return OpenAIModel(model_name, temperature, max_tokens)
+        elif provider == "anthropic":
+            return AnthropicModel(model_name, temperature, max_tokens)
+        elif provider == "huggingface":
+            return HuggingFaceModel(model_name, temperature, max_tokens)
         else:
-            raise ValueError(f"Unsupported model type: {model_type}")
-
-    def predict(self, data):
-        return self.model.predict(data)
-
-
-class StrongModel(Model):
-    def __init__(self, model_type):
-        if model_type == "openai":
-            self.model = OpenAIModel(api_key=os.getenv("OPENAI_API_KEY"))
-        elif model_type == "huggingface":
-            self.model = pipeline("text-generation", model="Llama3-70b")
-        elif model_type == "anthropic":
-            self.model = AnthropicModel(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        # elif model_type == "deepseek":
-        #    self.model = DeepSeekModel(api_key=os.getenv("DEEPSEEK_API_KEY"))
-        else:
-            raise ValueError(f"Unsupported model type: {model_type}")
-
-    def predict(self, data):
-        return self.model.predict(data)
+            raise ValueError(f"Unsupported provider: {provider}")
