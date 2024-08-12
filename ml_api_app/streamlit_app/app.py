@@ -52,30 +52,26 @@ with left_column:
             <style>
             .message-container {
                 height: 600px;
-                overflow-y: scroll;
+                overflow-y: auto;
                 border: 1px solid #ccc;
                 padding: 10px;
-                display: flex;
-                flex-direction: column-reverse;
             }
             </style>
             """,
             unsafe_allow_html=True,
         )
-        messages_html = '<div class="message-container">'
-        for message in st.session_state["messages"]:
-            messages_html += f"<p><strong>{message['role']}:</strong> {message['content']}</p>"
-        messages_html += '</div>'
-        st.markdown(messages_html, unsafe_allow_html=True)
+        with st.container():
+            for message in reversed(st.session_state["messages"]):
+                st.markdown(f"**{message['role']}:** {message['content']}")
 
-    display_messages()
+    if st.session_state["messages"]:
+        display_messages()
 
     def send_message_callback():
         st.session_state["send_message"] = True
 
     # User input
-    user_input = st.text_input("You: ", st.session_state.get(
-        "user_input_reset", ""), key="user_input", on_change=send_message_callback)
+    user_input = st.text_input("You: ", key="user_input", on_change=send_message_callback)
 
     if st.session_state.get("send_message"):
         if user_input:
@@ -88,7 +84,8 @@ with left_column:
                         {"role": "AI", "content": response["response"]})
                 else:
                     st.error("Unexpected response format")
-                st.session_state["user_input_reset"] = ""
+                st.session_state["user_input"] = ""  # Clear the input
+            st.experimental_rerun()  # Rerun to update the display
         else:
             st.error("Please enter a message")
         st.session_state["send_message"] = False
