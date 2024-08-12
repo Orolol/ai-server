@@ -23,26 +23,53 @@ class ActionOrganizerAgent(Agent):
         return actions_result
 
     def organize_actions(self, message: str) -> Dict[str, Any]:
-        analysis = self.analyze_message(message)
         actions_result = {}
+        all_results = []
+        loop_count = 0
+        max_loops = 5
 
-        if "actions" in analysis:
-            for action in analysis["actions"]:
-                action_result = self.execute_action(action)
-                actions_result[action["name"]] = action_result
+        while loop_count < max_loops:
+            loop_count += 1
+            
+            # Combine original message with all previous results
+            combined_input = f"{message}\n\nPrevious actions results:\n{json.dumps(all_results, indent=2)}"
+            
+            analysis = self.analyze_message(combined_input)
+            
+            if "actions" in analysis:
+                for action in analysis["actions"]:
+                    action_result = self.execute_action(action)
+                    actions_result[action["name"]] = action_result
+                    all_results.append({"action": action["name"], "result": action_result})
+            
+            # Check if we have enough information or can't answer
+            if analysis.get("status") == "complete" or analysis.get("status") == "cannot_answer":
+                break
 
-                # Check if further actions are needed based on the result
-                further_analysis = self.analyze_message(str(action_result))
-                if "actions" in further_analysis:
-                    for further_action in further_analysis["actions"]:
-                        further_result = self.execute_action(further_action)
-                        actions_result[further_action["name"]] = further_result
-
-        return actions_result
+        return {
+            "actions_result": actions_result,
+            "final_status": analysis.get("status", "incomplete"),
+            "iterations": loop_count
+        }
 
     def analyze_message(self, message: str) -> Dict[str, Any]:
         self.update_preprompt()  # Ensure the date is current
-        analysis_prompt = f"Analyze this message and determine if any actions are needed: {message}"
+        analysis_prompt = f"""Analyze this message and determine if any actions are needed: {message}
+
+        Return a JSON object with the following structure:
+        {{
+            "actions": [
+                {{"name": "action_name", "parameters": {{"param1": "value1", "param2": "value2"}}}},
+                ...
+            ],
+            "status": "in_progress" | "complete" | "cannot_answer"
+        }}
+
+        Set the status to:
+        - "in_progress" if more actions are needed to gather information
+        - "complete" if we have all the information needed to answer the prompt
+        - "cannot_answer" if we determine that we can't answer even with more actions
+        """
         analysis_result = self.model.predict({
             "conversation_history": [
                 {"role": "system", "content": self.preprompt},
@@ -56,7 +83,7 @@ class ActionOrganizerAgent(Agent):
             return json.loads(analysis_result)
         except json.JSONDecodeError:
             print(f"Failed to parse analysis result as JSON: {analysis_result}")
-            return {"actions": []}
+            return {"actions": [], "status": "cannot_answer"}
 
     def execute_action(self, action: Dict[str, Any]) -> Any:
         action_name = action["name"]
