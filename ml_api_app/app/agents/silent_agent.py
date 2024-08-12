@@ -7,6 +7,7 @@ from app.models.base_model import ModelFactory, Model
 from jinja2 import Environment, FileSystemLoader
 import json
 from typing import Dict, Any, List
+from app.utils.brave_search import BraveSearch
 
 
 class SilentAgent:
@@ -17,6 +18,7 @@ class SilentAgent:
         template = env.get_template('silent_agent_preprompt.jinja')
         self.preprompt = template.render({"date": datetime.datetime.now()})
         self.model: Model = ModelFactory.create_model(ai_provider, strength)
+        self.brave_search = BraveSearch()
 
     def act(self, data: Dict[str, Any]) -> Any:
         action = data.get("action")
@@ -24,8 +26,29 @@ class SilentAgent:
             return self.memory_action(data)
         elif action == "URL_lookup":
             return self.url_lookup_action(data)
+        elif action == "Web_search":
+            return self.web_search_action(data)
         else:
             raise ValueError(f"Unknown action: {action}")
+
+    def web_search_action(self, data: Dict[str, Any]) -> str:
+        ai_logger.info(f"Web search action initiated with data: {data}")
+        query = data.get("query")
+        if not query:
+            raise ValueError("Query is required for Web_search action")
+        
+        search_results = self.brave_search.search(query, count=5)
+        
+        summary_prompt = f"Summarize the following search results for the query: '{query}'\n\n"
+        for result in search_results.get('web', {}).get('results', []):
+            summary_prompt += f"Title: {result['title']}\nDescription: {result['description']}\nURL: {result['url']}\n\n"
+
+        summary = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
+
+        self.memory.store_interaction("web_search", summary, [])
+        ai_logger.info(f"Web search summary stored: {summary[:100]}...")
+
+        return summary
 
     def memory_action(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
         search_terms = data.get("search_terms", "")
