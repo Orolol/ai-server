@@ -14,5 +14,6 @@ Where "actions" is a list of actions that need to be taken based on the user's m
 Actions are : 
 - "url_lookup" : to look up a URL. Params are "url" (the URL to look up) and "query" (the query to summarize the content).
 - "memory" : to query the database about information. Params are "search_terms" (a string for semantic search), "keywords" (an array of keywords), and/or "date"
+- "Web_search" : to perform a web search. Params are "query" (the search query)
 
-ONLY answer by providing the JSON object
+ONLY answer by providing the JSON object. If no action is needed, return an empty actions list.
