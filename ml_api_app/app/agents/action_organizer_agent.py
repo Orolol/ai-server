@@ -10,9 +10,12 @@ class ActionOrganizerAgent(Agent):
         self.model = model
         self.silent_agent = silent_agent
         
-        env = Environment(loader=FileSystemLoader('app/templates'))
-        template = env.get_template('silent_agent_preprompt.jinja')
-        self.preprompt = template.render({"date": datetime.datetime.now()})
+        self.env = Environment(loader=FileSystemLoader('app/templates'))
+        self.update_preprompt()
+    
+    def update_preprompt(self):
+        template = self.env.get_template('silent_agent_preprompt.jinja')
+        self.preprompt = template.render({"date": datetime.datetime.now().strftime("%Y-%m-%d")})
 
     def act(self, data: Dict[str, Any]) -> Dict[str, Any]:
         message = data['prompt']
@@ -38,10 +41,11 @@ class ActionOrganizerAgent(Agent):
         return actions_result
 
     def analyze_message(self, message: str) -> Dict[str, Any]:
+        self.update_preprompt()  # Ensure the date is current
         analysis_prompt = f"Analyze this message and determine if any actions are needed: {message}"
         analysis_result = self.model.predict({
             "conversation_history": [
-                {"role": "system", "content": f"{self.preprompt}\n\nYou are an AI assistant that analyzes messages and determines necessary actions."},
+                {"role": "system", "content": self.preprompt},
                 {"role": "user", "content": analysis_prompt}
             ]
         })
@@ -51,7 +55,8 @@ class ActionOrganizerAgent(Agent):
         try:
             return json.loads(analysis_result)
         except json.JSONDecodeError:
-            return {"error": "Failed to parse analysis result as JSON"}
+            print(f"Failed to parse analysis result as JSON: {analysis_result}")
+            return {"actions": []}
 
     def execute_action(self, action: Dict[str, Any]) -> Any:
         action_name = action["name"]
