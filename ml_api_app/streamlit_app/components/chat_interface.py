@@ -6,16 +6,32 @@ def chat_interface():
         """
         <style>
         .chat-container {
-            height: calc(100vh - 200px);
+            height: 400px;
             overflow-y: auto;
             border: 1px solid #ccc;
             padding: 10px;
             margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+        .user-message {
+            align-self: flex-end;
+            background-color: #e6f3ff;
+        }
+        .ai-message {
+            align-self: flex-start;
+            background-color: #f0f0f0;
         }
         .stTextInput {
             position: fixed;
             bottom: 20px;
-            width: calc(66.67% - 40px);
+            width: calc(100% - 80px);
         }
         </style>
         """,
@@ -26,37 +42,25 @@ def chat_interface():
     with chat_container:
         st.markdown('<div class="chat-container">', unsafe_allow_html=True)
         for message in st.session_state["messages"]:
-            st.markdown(f"**{message['role']}:** {message['content']}")
+            role_class = "user-message" if message['role'] == "user" else "ai-message"
+            st.markdown(f'<div class="message {role_class}">{message["content"]}</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Force the container to update
-    st.empty()
-
-    def send_message_callback():
-        st.session_state["send_message"] = True
-
     # User input
-    user_input = st.text_input("You: ", key=f"user_input_{st.session_state['user_input_key']}", on_change=send_message_callback)
+    user_input = st.text_input("You: ", key=f"user_input_{st.session_state['user_input_key']}")
 
-    if st.session_state.get("send_message"):
-        if user_input:
-            response = send_message(st.session_state["chatsessionsid"], user_input)
-            if response:
+    if user_input:
+        response = send_message(st.session_state["chatsessionsid"], user_input)
+        if response:
+            st.session_state["messages"].append(
+                {"role": "user", "content": user_input})
+            if "response" in response:
                 st.session_state["messages"].append(
-                    {"role": "user", "content": user_input})
-                if "response" in response:
-                    st.session_state["messages"].append(
-                        {"role": "AI", "content": response["response"]})
-                else:
-                    st.error("Unexpected response format")
-                st.session_state["user_input_key"] += 1  # Increment the key
-            st.experimental_rerun()  # Rerun to update the display
-        else:
-            st.error("Please enter a message")
-        st.session_state["send_message"] = False
-    
-    # Force the container to update again after processing the message
-    st.empty()
+                    {"role": "AI", "content": response["response"]})
+            else:
+                st.error("Unexpected response format")
+            st.session_state["user_input_key"] += 1  # Increment the key
+        st.experimental_rerun()  # Rerun to update the display
 
 def send_message(chatsessionsid, prompt):
     data = {
