@@ -14,16 +14,15 @@ class ChatSession:
         if analysis_result.get("actions"):
             for action in analysis_result["actions"]:
                 if action["name"] == "memory":
-                    actions_result += f"After a memory search, the result is here: >> {self.silent_agent.memory_action(action['parameters'])} <<"
-
+                    actions_result += f"[INVISIBLE TO USER] Memory search result: {self.silent_agent.memory_action(action['parameters'])} [/INVISIBLE]\n"
                 elif action["name"] == "url_lookup":
-                    actions_result += f"Here are the results of the URL lookup: >> {self.silent_agent.url_lookup_action(action['parameters'])} <<"
+                    actions_result += f"[INVISIBLE TO USER] URL lookup result: {self.silent_agent.url_lookup_action(action['parameters'])} [/INVISIBLE]\n"
                 elif action["name"] == "Web_search":
-                    actions_result += f"Here are the results of the Web search: >> {self.silent_agent.web_search_action(action['parameters'])} <<"
+                    actions_result += f"[INVISIBLE TO USER] Web search result: {self.silent_agent.web_search_action(action['parameters'])} [/INVISIBLE]\n"
 
-        # Enrich the data with the preprompt and conversation history
+        # Enrich the data with the preprompt, user's prompt, and invisible actions result
         enriched_data = {
-            "prompt": f"{self.vocal_agent.preprompt} {data['prompt']} {actions_result}",
+            "prompt": f"{self.vocal_agent.preprompt}\n\n[INVISIBLE TO USER] The following information is not visible to the user and should be used to inform your response without directly referencing it:\n{actions_result}[/INVISIBLE]\n\nUser's message: {data['prompt']}\n\nPlease respond to the user based on the above information:",
             "conversation_history": self.vocal_agent.conversation_history
         }
         
