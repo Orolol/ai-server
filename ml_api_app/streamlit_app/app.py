@@ -28,6 +28,15 @@ def send_message(chatsessionsid, prompt):
         st.error("Failed to send message")
         return None
 
+def restart_session():
+    st.session_state["chatsessionsid"] = None
+    st.session_state["messages"] = []
+    st.session_state["user_input"] = ""
+    st.session_state["user_input_key"] = 0
+    st.session_state["send_message"] = False
+    st.session_state["chat_started"] = False
+    st.session_state["chat_params"] = {}
+
 # Initialize session state variables
 if "chatsessionsid" not in st.session_state:
     st.session_state["chatsessionsid"] = None
@@ -48,26 +57,26 @@ if "chat_params" not in st.session_state:
 left_column, right_column = st.columns([2, 1])
 
 with left_column:
-    def display_messages():
-        st.markdown(
-            """
-            <style>
-            .message-container {
-                height: 600px;
-                overflow-y: auto;
-                border: 1px solid #ccc;
-                padding: 10px;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-        with st.container():
-            for message in reversed(st.session_state["messages"]):
-                st.markdown(f"**{message['role']}:** {message['content']}")
-
-    if st.session_state["messages"]:
-        display_messages()
+    st.markdown(
+        """
+        <style>
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    
+    with st.container():
+        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+        for message in st.session_state["messages"]:
+            st.markdown(f"**{message['role']}:** {message['content']}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     def send_message_callback():
         st.session_state["send_message"] = True
@@ -138,3 +147,9 @@ with right_column:
             st.session_state["messages"] = []  # Clear the messages in the UI
         else:
             st.error(f"Failed to clear memory: {response.json().get('error', 'Unknown error')}")
+    
+    # Restart session button
+    if st.button("Restart Session"):
+        restart_session()
+        st.success("Session restarted successfully!")
+        st.experimental_rerun()
