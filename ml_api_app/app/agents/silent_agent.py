@@ -38,27 +38,16 @@ class SilentAgent(ModelAgent):
         if not query:
             raise ValueError("Query is required for Web_search action")
         
-        search_results = self.brave_search.search(query, count=5, summary=1)
+        detailed_summary = self.brave_search.get_detailed_summary(query)
         
-        print("SEARCH RESULTS: ", search_results)   
+        print("DETAILED SUMMARY: ", detailed_summary)   
         
-        if 'summarizer' in search_results and 'key' in search_results['summarizer']:
-            summary_key = search_results['summarizer']['key']
-            summary = self.brave_search.get_summary(summary_key)
-            if 'summary' in summary:
-                result = summary['summary']
-            else:
-                result = "No summary available."
-        else:
-            summary_prompt = f"Summarize the following search results for the query.: '{query}'\n\n"
-            for result in search_results.get('web', {}).get('results', []):
-                summary_prompt += f"Title: {result['title']}\nDescription: {result['description']}\nURL: {result['url']}\n\n"
-            result = self.model.predict({"prompt": summary_prompt})
-            
+        result = detailed_summary['summary']
+        
         print("RESULT: ", result)
 
         # Store each search result individually
-        for search_result in search_results.get('web', {}).get('results', []):
+        for search_result in detailed_summary['results']:
             self.memory.store_interaction(
                 "web_search_result",
                 json.dumps({
