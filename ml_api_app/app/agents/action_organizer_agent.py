@@ -39,6 +39,8 @@ class ActionOrganizerAgent(Agent):
                 {"role": "user", "content": analysis_prompt}
             ]
         })
+        print("Analysis prompt: ", analysis_prompt)
+        print("Analysis result: ", analysis_result)
         
         try:
             return json.loads(analysis_result)
