@@ -37,18 +37,25 @@ class SilentAgent:
         if not query:
             raise ValueError("Query is required for Web_search action")
         
-        search_results = self.brave_search.search(query, count=5)
+        search_results = self.brave_search.search(query, count=5, summary=1)
         
-        summary_prompt = f"Summarize the following search results for the query: '{query}'\n\n"
-        for result in search_results.get('web', {}).get('results', []):
-            summary_prompt += f"Title: {result['title']}\nDescription: {result['description']}\nURL: {result['url']}\n\n"
+        if 'summarizer' in search_results and 'key' in search_results['summarizer']:
+            summary_key = search_results['summarizer']['key']
+            summary = self.brave_search.get_summary(summary_key)
+            if 'summary' in summary:
+                result = summary['summary']
+            else:
+                result = "No summary available."
+        else:
+            summary_prompt = f"Summarize the following search results for the query: '{query}'\n\n"
+            for result in search_results.get('web', {}).get('results', []):
+                summary_prompt += f"Title: {result['title']}\nDescription: {result['description']}\nURL: {result['url']}\n\n"
+            result = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
 
-        summary = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
+        self.memory.store_interaction("web_search", result, [query])
+        ai_logger.info(f"Web search summary stored: {result[:100]}...")
 
-        self.memory.store_interaction("web_search", summary, [query])
-        ai_logger.info(f"Web search summary stored: {summary[:100]}...")
-
-        return summary
+        return result
 
     def memory_action(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
         search_terms = data.get("search_terms", "")
