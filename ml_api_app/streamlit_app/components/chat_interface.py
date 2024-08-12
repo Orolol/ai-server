@@ -5,15 +5,6 @@ def chat_interface():
     st.markdown(
         """
         <style>
-        .chat-container {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-        }
         .message {
             margin-bottom: 10px;
             padding: 5px 10px;
@@ -21,30 +12,24 @@ def chat_interface():
             max-width: 80%;
         }
         .user-message {
-            align-self: flex-end;
+            margin-left: auto;
             background-color: #e6f3ff;
         }
         .ai-message {
-            align-self: flex-start;
+            margin-right: auto;
             background-color: #f0f0f0;
         }
-        .stTextInput {
-            position: fixed;
-            bottom: 20px;
-            width: calc(100% - 80px);
+        .stTextInput>div>div>input {
+            width: calc(100% - 10px);
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
     
-    chat_container = st.container()
-    with chat_container:
-        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-        for message in st.session_state["messages"]:
-            role_class = "user-message" if message['role'] == "user" else "ai-message"
-            st.markdown(f'<div class="message {role_class}">{message["content"]}</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    for message in st.session_state["messages"]:
+        role_class = "user-message" if message['role'] == "user" else "ai-message"
+        st.markdown(f'<div class="message {role_class}">{message["content"]}</div>', unsafe_allow_html=True)
 
     # User input
     user_input = st.text_input("You: ", key=f"user_input_{st.session_state['user_input_key']}")
