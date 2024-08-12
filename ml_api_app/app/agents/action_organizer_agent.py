@@ -2,11 +2,17 @@ from app.agents.base_agent import Agent
 from app.models.base_model import Model
 from typing import Dict, Any, List
 import json
+from jinja2 import Environment, FileSystemLoader
+import datetime
 
 class ActionOrganizerAgent(Agent):
     def __init__(self, model: Model, silent_agent):
         self.model = model
         self.silent_agent = silent_agent
+        
+        env = Environment(loader=FileSystemLoader('app/templates'))
+        template = env.get_template('silent_agent_preprompt.jinja')
+        self.preprompt = template.render({"date": datetime.datetime.now()})
 
     def act(self, data: Dict[str, Any]) -> Dict[str, Any]:
         message = data['prompt']
@@ -35,7 +41,7 @@ class ActionOrganizerAgent(Agent):
         analysis_prompt = f"Analyze this message and determine if any actions are needed: {message}"
         analysis_result = self.model.predict({
             "conversation_history": [
-                {"role": "system", "content": "You are an AI assistant that analyzes messages and determines necessary actions."},
+                {"role": "system", "content": f"{self.preprompt}\n\nYou are an AI assistant that analyzes messages and determines necessary actions."},
                 {"role": "user", "content": analysis_prompt}
             ]
         })
