@@ -61,22 +61,31 @@ with left_column:
         """
         <style>
         .chat-container {
-            height: 500px;
+            height: calc(100vh - 200px);
             overflow-y: auto;
             border: 1px solid #ccc;
             padding: 10px;
             margin-bottom: 20px;
+        }
+        .stTextInput {
+            position: fixed;
+            bottom: 20px;
+            width: calc(66.67% - 40px);
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
     
-    with st.container():
+    chat_container = st.container()
+    with chat_container:
         st.markdown('<div class="chat-container">', unsafe_allow_html=True)
         for message in st.session_state["messages"]:
             st.markdown(f"**{message['role']}:** {message['content']}")
         st.markdown('</div>', unsafe_allow_html=True)
+
+    # Force the container to update
+    st.empty()
 
     def send_message_callback():
         st.session_state["send_message"] = True
@@ -100,6 +109,9 @@ with left_column:
         else:
             st.error("Please enter a message")
         st.session_state["send_message"] = False
+    
+    # Force the container to update again after processing the message
+    st.empty()
 
 with right_column:
     st.subheader("Chat Session Parameters")
