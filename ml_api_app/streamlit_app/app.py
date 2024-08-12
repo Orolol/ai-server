@@ -35,6 +35,8 @@ if "messages" not in st.session_state:
     st.session_state["messages"] = []
 if "user_input" not in st.session_state:
     st.session_state["user_input"] = ""
+if "user_input_key" not in st.session_state:
+    st.session_state["user_input_key"] = 0
 if "send_message" not in st.session_state:
     st.session_state["send_message"] = False
 if "chat_started" not in st.session_state:
@@ -71,7 +73,7 @@ with left_column:
         st.session_state["send_message"] = True
 
     # User input
-    user_input = st.text_input("You: ", key="user_input", on_change=send_message_callback)
+    user_input = st.text_input("You: ", key=f"user_input_{st.session_state['user_input_key']}", on_change=send_message_callback)
 
     if st.session_state.get("send_message"):
         if user_input:
@@ -84,7 +86,7 @@ with left_column:
                         {"role": "AI", "content": response["response"]})
                 else:
                     st.error("Unexpected response format")
-                st.session_state["user_input"] = ""  # Clear the input
+                st.session_state["user_input_key"] += 1  # Increment the key
             st.experimental_rerun()  # Rerun to update the display
         else:
             st.error("Please enter a message")
