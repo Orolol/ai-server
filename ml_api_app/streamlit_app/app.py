@@ -120,7 +120,10 @@ with right_column:
             if st.session_state["chatsessionsid"]:
                 st.session_state["chat_started"] = True
                 st.session_state["chat_params"] = params
+                st.success("Chat session started successfully!")
                 st.experimental_rerun()
+            else:
+                st.error("Failed to start chat session. Please try again.")
 
     if st.session_state["chat_started"]:
         ai_provider = st.session_state['chat_params']['ai_provider']
