@@ -9,7 +9,7 @@ def start_chat_session(params):
     response = requests.post("http://localhost:5000/start_chat",
                              json=params, headers={"Content-Type": "application/json"})
     if response.status_code == 200:
-        st.session_state["user_input"] = ""
+        st.session_state["user_input_reset"] = ""
         return response.json()["chatsessionsid"]
     else:
         st.error("Failed to start chat session")
@@ -88,7 +88,7 @@ with left_column:
                         {"role": "AI", "content": response["response"]})
                 else:
                     st.error("Unexpected response format")
-                st.session_state["user_input"] = ""
+                st.session_state["user_input_reset"] = ""
         else:
             st.error("Please enter a message")
         st.session_state["send_message"] = False
