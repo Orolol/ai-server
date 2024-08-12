@@ -40,6 +40,8 @@ class SilentAgent(ModelAgent):
         
         search_results = self.brave_search.search(query, count=5, summary=1)
         
+        print("SEARCH RESULTS: ", search_results)   
+        
         if 'summarizer' in search_results and 'key' in search_results['summarizer']:
             summary_key = search_results['summarizer']['key']
             summary = self.brave_search.get_summary(summary_key)
@@ -48,10 +50,12 @@ class SilentAgent(ModelAgent):
             else:
                 result = "No summary available."
         else:
-            summary_prompt = f"Summarize the following search results for the query: '{query}'\n\n"
+            summary_prompt = f"Summarize the following search results for the query.: '{query}'\n\n"
             for result in search_results.get('web', {}).get('results', []):
                 summary_prompt += f"Title: {result['title']}\nDescription: {result['description']}\nURL: {result['url']}\n\n"
             result = self.model.predict({"prompt": summary_prompt})
+            
+        print("RESULT: ", result)
 
         # Store each search result individually
         for search_result in search_results.get('web', {}).get('results', []):
