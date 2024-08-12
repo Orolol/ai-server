@@ -33,7 +33,12 @@ class ActionOrganizerAgent(Agent):
 
     def analyze_message(self, message: str) -> Dict[str, Any]:
         analysis_prompt = f"Analyze this message and determine if any actions are needed: {message}"
-        analysis_result = self.model.predict({"prompt": analysis_prompt})
+        analysis_result = self.model.predict({
+            "conversation_history": [
+                {"role": "system", "content": "You are an AI assistant that analyzes messages and determines necessary actions."},
+                {"role": "user", "content": analysis_prompt}
+            ]
+        })
         
         try:
             return json.loads(analysis_result)

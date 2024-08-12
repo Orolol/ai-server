@@ -20,8 +20,15 @@ class OpenAIModel(Model):
         self.kwargs = kwargs
 
     def predict(self, data: Dict[str, Any]) -> str:
+        if "conversation_history" in data:
+            messages = data["conversation_history"]
+        elif "prompt" in data:
+            messages = [{"role": "user", "content": data["prompt"]}]
+        else:
+            raise ValueError("Either 'conversation_history' or 'prompt' must be provided in the data.")
+
         chat_completion = self.client.chat.completions.create(
-            messages=data["conversation_history"],
+            messages=messages,
             model=self.model_name,
             **self.kwargs
         )
