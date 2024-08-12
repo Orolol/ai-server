@@ -90,7 +90,7 @@ class SilentAgent:
                 {"role": "user", "content": f"Analyze this message: {message}"}
             ]
         })
-        ai_logger.info(f"Analysis result: {analysis_result[:100]}...")
+        ai_logger.info(f"Analysis result: {analysis_result}...")
 
         try:
             return json.loads(analysis_result)

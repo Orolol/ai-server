@@ -24,6 +24,8 @@ class ChatSession:
             "prompt": f"{self.vocal_agent.preprompt} {data['prompt']} {actions_result}",
             "conversation_history": self.vocal_agent.conversation_history
         }
+        
+        print("Enriched data: ", enriched_data)
 
         # Send the enriched data to the VocalAgent
         response = self.vocal_agent.act(enriched_data)
