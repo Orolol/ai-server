@@ -8,6 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 import json
 from typing import Dict, Any, List
 from app.utils.brave_search import BraveSearch
+import json
 
 
 class SilentAgent:
@@ -52,8 +53,22 @@ class SilentAgent:
                 summary_prompt += f"Title: {result['title']}\nDescription: {result['description']}\nURL: {result['url']}\n\n"
             result = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
 
-        self.memory.store_interaction("web_search", result, [query])
-        ai_logger.info(f"Web search summary stored: {result[:100]}...")
+        # Store each search result individually
+        for search_result in search_results.get('web', {}).get('results', []):
+            self.memory.store_interaction(
+                "web_search_result",
+                json.dumps({
+                    "query": query,
+                    "title": search_result['title'],
+                    "description": search_result['description'],
+                    "url": search_result['url']
+                }),
+                [query, search_result['title']]
+            )
+
+        # Store the overall summary
+        self.memory.store_interaction("web_search_summary", result, [query])
+        ai_logger.info(f"Web search results and summary stored for query: {query}")
 
         return result
 

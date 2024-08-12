@@ -97,3 +97,21 @@ class LongTermMemory:
         except Exception as e:
             logger.error(f"Failed to clear memory - {str(e)}", exc_info=True)
             raise
+
+    def retrieve_search_results(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
+        try:
+            results = self.collection.query(
+                query_texts=[query],
+                where={"$and": [{"agent_type": "web_search_result"}]},
+                n_results=n_results
+            )
+            search_results = []
+            for doc, metadata in zip(results['documents'][0], results['metadatas'][0]):
+                search_result = json.loads(doc)
+                search_result['score'] = metadata['distance']
+                search_results.append(search_result)
+            logger.info(f"Retrieved {len(search_results)} search results for query: {query}")
+            return search_results
+        except Exception as e:
+            logger.error(f"Failed to retrieve search results - {str(e)}", exc_info=True)
+            raise
