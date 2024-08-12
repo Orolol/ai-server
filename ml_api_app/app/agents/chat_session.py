@@ -18,6 +18,8 @@ class ChatSession:
 
                 elif action["name"] == "url_lookup":
                     actions_result += f"Here are the results of the URL lookup: >> {self.silent_agent.url_lookup_action(action['parameters'])} <<"
+                elif action["name"] == "Web_search":
+                    actions_result += f"Here are the results of the Web search: >> {self.silent_agent.web_search_action(action['parameters'])} <<"
 
         # Enrich the data with the preprompt and conversation history
         enriched_data = {

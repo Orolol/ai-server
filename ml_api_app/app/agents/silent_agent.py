@@ -45,7 +45,7 @@ class SilentAgent:
 
         summary = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
 
-        self.memory.store_interaction("web_search", summary, [])
+        self.memory.store_interaction("web_search", summary, [query])
         ai_logger.info(f"Web search summary stored: {summary[:100]}...")
 
         return summary
