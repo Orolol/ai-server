@@ -1,5 +1,4 @@
 import uuid
-from app.agents.action_organizer_agent import ActionOrganizerAgent
 
 class ChatSession:
     def __init__(self, silent_agent, vocal_agent, action_organizer_agent):

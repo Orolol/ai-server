@@ -2,6 +2,7 @@ from flask import request, jsonify, Blueprint
 from app.agents.base_agent import ChatAgent, CodingAgent
 from app.agents.chat_session import ChatSession
 from app.agents.silent_agent import SilentAgent
+from app.agents.action_organizer_agent import ActionOrganizerAgent
 from app.models.base_model import ModelFactory
 from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
@@ -49,7 +50,9 @@ def start_chat():
         silent_agent = SilentAgent(
             memory_db_path="localhost", ai_provider=ai_provider, strength="weak")
         print("Silent agent created")
-        chat_session = ChatSession(silent_agent, vocal_agent)
+        action_organizer_agent = ActionOrganizerAgent(weak_model, silent_agent)
+        print("Action organizer agent created")
+        chat_session = ChatSession(silent_agent, vocal_agent, action_organizer_agent)
         print(f"Chat session created with ID: {chat_session.session_id}")
         chat_sessions[chat_session.session_id] = chat_session
     except ValueError as e:
