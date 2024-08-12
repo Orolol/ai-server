@@ -43,7 +43,8 @@ class BraveSearch:
         
         detailed_summary = {
             "query": query,
-            "results": []
+            "results": [],
+            "summary": ""
         }
 
         for result in search_results.get("web", {}).get("results", []):
@@ -56,6 +57,8 @@ class BraveSearch:
 
         if "summaryKey" in search_results:
             summary = self.get_summary(search_results["summaryKey"])
-            detailed_summary["overall_summary"] = summary.get("summary", "")
+            detailed_summary["summary"] = summary.get("summary", "No summary available.")
+        else:
+            detailed_summary["summary"] = "No summary available from Brave Search API."
 
         return detailed_summary
