@@ -8,24 +8,24 @@ from jinja2 import Environment, FileSystemLoader
 import json
 from typing import Dict, Any, List
 from app.utils.brave_search import BraveSearch
-import json
+from app.agents.base_agent import ModelAgent
 
 
-class SilentAgent:
+class SilentAgent(ModelAgent):
     def __init__(self, memory_db_path: str = "localhost", ai_provider: str = "openai", strength: str = "weak"):
-        self.memory = LongTermMemory(memory_db_path)
+        model = ModelFactory.create_model(ai_provider, strength)
+        super().__init__(model, memory_db_path)
 
         env = Environment(loader=FileSystemLoader('app/templates'))
         template = env.get_template('silent_agent_preprompt.jinja')
         self.preprompt = template.render({"date": datetime.datetime.now()})
-        self.model: Model = ModelFactory.create_model(ai_provider, strength)
         self.brave_search = BraveSearch()
 
     def act(self, data: Dict[str, Any]) -> Any:
         action = data.get("action")
-        if action == "Memory":
+        if action == "memory":
             return self.memory_action(data)
-        elif action == "URL_lookup":
+        elif action == "url_lookup":
             return self.url_lookup_action(data)
         elif action == "Web_search":
             return self.web_search_action(data)
@@ -51,7 +51,7 @@ class SilentAgent:
             summary_prompt = f"Summarize the following search results for the query: '{query}'\n\n"
             for result in search_results.get('web', {}).get('results', []):
                 summary_prompt += f"Title: {result['title']}\nDescription: {result['description']}\nURL: {result['url']}\n\n"
-            result = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
+            result = self.model.predict({"prompt": summary_prompt})
 
         # Store each search result individually
         for search_result in search_results.get('web', {}).get('results', []):
@@ -94,28 +94,9 @@ class SilentAgent:
         text = soup.get_text()
 
         summary_prompt = f"In the following text, extract and summarize information in relation the user query. Query : '{query}'\n\nText: {text}"
-        summary = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
+        summary = self.model.predict({"prompt": summary_prompt})
 
         self.memory.store_interaction("url_lookup", summary, [])
         ai_logger.info(f"URL lookup summary stored: {summary[:100]}...")
 
         return summary
-
-    def analyze_message(self, message: str) -> Dict[str, Any]:
-        """
-        Analyze the user message to determine if any actions are needed.
-        """
-        ai_logger.info(f"Analyzing message: {message[:50]}...")
-        analysis_result = self.model.predict({
-            "conversation_history": [
-                {"role": "system", "content": self.preprompt},
-                {"role": "user", "content": f"Analyze this message: {message}"}
-            ]
-        })
-        ai_logger.info(f"Analysis result: {analysis_result}...")
-
-        try:
-            return json.loads(analysis_result)
-        except json.JSONDecodeError:
-            ai_logger.error(f"Failed to parse analysis result as JSON: {analysis_result}")
-            return {}
