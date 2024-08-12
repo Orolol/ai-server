@@ -48,7 +48,7 @@ class SilentAgent:
         soup = BeautifulSoup(response.content, 'html.parser')
         text = soup.get_text()
 
-        summary_prompt = f"Summarize the following text in relation to this query: '{query}'\n\nText: {text}"
+        summary_prompt = f"In the following text, extract and summarize information in relation the user query. Query : '{query}'\n\nText: {text}"
         summary = self.model.predict({"conversation_history": [{"role": "user", "content": summary_prompt}]})
 
         self.memory.store_interaction("url_lookup", summary, [])
