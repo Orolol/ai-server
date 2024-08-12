@@ -42,7 +42,14 @@ class SilentAgent(ModelAgent):
         
         print("DETAILED SUMMARY: ", detailed_summary)   
         
-        result = detailed_summary.get('summary', "No summary available.")
+        result = detailed_summary.get('summary')
+        
+        # If no summary is available from Brave Search API, generate one using the model
+        if not result:
+            summary_prompt = f"Summarize the following search results for the query: '{query}'\n\n"
+            for search_result in detailed_summary['results']:
+                summary_prompt += f"Title: {search_result['title']}\nDescription: {search_result['description']}\nURL: {search_result['url']}\n\n"
+            result = self.model.predict({"prompt": summary_prompt})
         
         print("RESULT: ", result)
 
@@ -62,13 +69,6 @@ class SilentAgent(ModelAgent):
         # Store the overall summary
         self.memory.store_interaction("web_search_summary", result, [query])
         ai_logger.info(f"Web search results and summary stored for query: {query}")
-
-        # If no summary is available, generate one using the model
-        if result == "No summary available.":
-            summary_prompt = f"Summarize the following search results for the query: '{query}'\n\n"
-            for result in detailed_summary['results']:
-                summary_prompt += f"Title: {result['title']}\nDescription: {result['description']}\nURL: {result['url']}\n\n"
-            result = self.model.predict({"prompt": summary_prompt})
 
         return result
 
