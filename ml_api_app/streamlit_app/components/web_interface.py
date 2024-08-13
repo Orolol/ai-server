@@ -21,8 +21,7 @@ def web_interface(session_id):
             if response.status_code == 200:
                 st.write("Search Results:")
                 st.write(response.json().get("results", "No results available"))
-                # Refresh the history after a new search
-                fetch_and_display_history(session_id)
+                # The history will be automatically updated by the background task
             else:
                 st.error("Failed to perform web search")
         else:
@@ -37,8 +36,7 @@ def web_interface(session_id):
             if response.status_code == 200:
                 st.write("URL Content:")
                 st.write(response.json().get("content", "No content available"))
-                # Refresh the history after loading URL content
-                fetch_and_display_history(session_id)
+                # The history will be automatically updated by the background task
             else:
                 st.error("Failed to load URL content")
         else:
