@@ -46,7 +46,7 @@ class SilentAgent(ModelAgent):
         
         # If no summary is available from Brave Search API, generate one using the model
         if not result:
-            summary_prompt = f"Summarize the following search results for the query: '{query}'\n\n"
+            summary_prompt = f"Summarize the following search results for the query. Please keep urls and try to keep as much information needed to answer the query.: '{query}'\n\n"
             for search_result in detailed_summary['results']:
                 summary_prompt += f"Title: {search_result['title']}\nDescription: {search_result['description']}\nURL: {search_result['url']}\n\n"
             result = self.model.predict({"prompt": summary_prompt})
