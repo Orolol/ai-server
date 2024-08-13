@@ -50,7 +50,7 @@ def start_chat():
         silent_agent = SilentAgent(
             memory_db_path="localhost", ai_provider=ai_provider, strength="weak")
         print("Silent agent created")
-        action_organizer_agent = ActionOrganizerAgent(weak_model, silent_agent)
+        action_organizer_agent = ActionOrganizerAgent(strong_model, silent_agent)
         print("Action organizer agent created")
         chat_session = ChatSession(silent_agent, vocal_agent, action_organizer_agent)
         print(f"Chat session created with ID: {chat_session.session_id}")
