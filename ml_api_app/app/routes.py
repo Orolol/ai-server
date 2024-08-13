@@ -6,9 +6,11 @@ from app.agents.action_organizer_agent import ActionOrganizerAgent
 from app.models.base_model import ModelFactory
 from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
+from app.workspace.workspace_manager import WorkspaceManager
 
 # Store chat sessions
 chat_sessions = {}
+workspace_manager = WorkspaceManager()
 
 routes = Blueprint('routes', __name__)
 
@@ -87,3 +89,49 @@ def clear_memory():
         return jsonify({"message": "Memory cleared successfully"}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to clear memory: {str(e)}"}), 500
+
+@routes.route('/create_workspace', methods=['POST'])
+def create_workspace():
+    data = request.get_json()
+    workspace_name = data.get('workspace_name')
+    if not workspace_name:
+        return jsonify({"error": "Workspace name is required"}), 400
+    
+    try:
+        workspace_id = workspace_manager.create_workspace(workspace_name)
+        return jsonify({"workspace_id": workspace_id}), 201
+    except Exception as e:
+        return jsonify({"error": f"Failed to create workspace: {str(e)}"}), 500
+
+@routes.route('/get_workspace/<workspace_id>', methods=['GET'])
+def get_workspace(workspace_id):
+    try:
+        workspace = workspace_manager.get_workspace(workspace_id)
+        return jsonify(workspace), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to get workspace: {str(e)}"}), 404
+
+@routes.route('/update_workspace/<workspace_id>', methods=['PUT'])
+def update_workspace(workspace_id):
+    data = request.get_json()
+    try:
+        updated_workspace = workspace_manager.update_workspace(workspace_id, data)
+        return jsonify(updated_workspace), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to update workspace: {str(e)}"}), 400
+
+@routes.route('/delete_workspace/<workspace_id>', methods=['DELETE'])
+def delete_workspace(workspace_id):
+    try:
+        workspace_manager.delete_workspace(workspace_id)
+        return jsonify({"message": "Workspace deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete workspace: {str(e)}"}), 400
+
+@routes.route('/list_workspaces', methods=['GET'])
+def list_workspaces():
+    try:
+        workspaces = workspace_manager.list_workspaces()
+        return jsonify(workspaces), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to list workspaces: {str(e)}"}), 500
