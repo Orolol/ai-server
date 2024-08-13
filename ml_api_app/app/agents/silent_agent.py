@@ -40,8 +40,6 @@ class SilentAgent(ModelAgent):
         
         detailed_summary = self.brave_search.get_detailed_summary(query)
         
-        print("DETAILED SUMMARY: ", detailed_summary)   
-        
         result = detailed_summary.get('summary')
         
         # If no summary is available from Brave Search API, generate one using the model
@@ -51,52 +49,44 @@ class SilentAgent(ModelAgent):
                 summary_prompt += f"Title: {search_result['title']}\nDescription: {search_result['description']}\nURL: {search_result['url']}\n\n"
             result = self.model.predict({"prompt": summary_prompt})
         
-        print("RESULT: ", result)
-
-        # Store each search result individually
-        for search_result in detailed_summary['results']:
-            self.memory.store_interaction(
-                "web_search_result",
-                json.dumps({
-                    "query": query,
-                    "title": search_result['title'],
-                    "description": search_result['description'],
-                    "url": search_result['url']
-                }),
-                [query, search_result['title']]
-            )
-
-        # Store the overall summary
-        self.memory.store_interaction("web_search_summary", result, [query])
+        # Store the search action
+        self.memory.store_interaction(
+            "web_search",
+            json.dumps({
+                "query": query,
+                "result": result
+            }),
+            [query]
+        )
         ai_logger.info(f"Web search results and summary stored for query: {query}")
 
         return result
 
-    def memory_action(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        search_terms = data.get("search_terms", "")
-        keywords = data.get("keywords", [])
-        date = data.get("date")
-        results = self.memory.search_interactions(search_terms, keywords, date)
-        ai_logger.info(
-            f"{datetime.datetime.now()} - Memory search results: {results}")
-        return results
-
     def url_lookup_action(self, data: Dict[str, Any]) -> str:
         ai_logger.info(f"URL lookup action initiated with data: {data}")
         url = data.get("url")
-        query = data.get("query")
         if not url:
             raise ValueError("URL is required for URL_lookup action")
-        if not query:
-            raise ValueError("Query is required for URL_lookup action")
+        
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
         text = soup.get_text()
 
-        summary_prompt = f"In the following text, extract and summarize information in relation the user query. Query : '{query}'\n\nText: {text}"
+        summary_prompt = f"Summarize the main content of the following webpage:\n\n{text[:5000]}"  # Limit to first 5000 characters
         summary = self.model.predict({"prompt": summary_prompt})
 
-        self.memory.store_interaction("url_lookup", summary, [])
-        ai_logger.info(f"URL lookup summary stored: {summary[:100]}...")
+        # Store the URL lookup action
+        self.memory.store_interaction(
+            "url_lookup",
+            json.dumps({
+                "url": url,
+                "summary": summary
+            }),
+            [url]
+        )
+        ai_logger.info(f"URL lookup summary stored for URL: {url}")
 
         return summary
+
+    def get_web_action_history(self) -> List[Dict[str, Any]]:
+        return self.memory.search_interactions(["web_search", "url_lookup"], [], None)

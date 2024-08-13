@@ -205,41 +205,37 @@ def get_workspace_configuration(workspace_id):
         return jsonify({"error": f"Failed to get configuration: {str(e)}"}), 400
 
 # Web tab routes
-@routes.route('/create_web_session', methods=['POST'])
-def create_web_session():
+@routes.route('/get_web_action_history', methods=['GET'])
+def get_web_action_history():
     try:
-        session_id = web_manager.create_session()
-        return jsonify({"session_id": session_id}), 201
+        history = web_manager.get_action_history()
+        return jsonify({"actions": history}), 200
     except Exception as e:
-        return jsonify({"error": f"Failed to create web session: {str(e)}"}), 500
+        return jsonify({"error": f"Failed to get web action history: {str(e)}"}), 500
 
-@routes.route('/navigate/<session_id>', methods=['POST'])
-def navigate(session_id):
+@routes.route('/web_search', methods=['POST'])
+def web_search():
+    data = request.get_json()
+    query = data.get('query')
+    if not query:
+        return jsonify({"error": "Query is required"}), 400
+    try:
+        results = web_manager.perform_search(query)
+        return jsonify({"results": results}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to perform web search: {str(e)}"}), 500
+
+@routes.route('/load_url_content', methods=['POST'])
+def load_url_content():
     data = request.get_json()
     url = data.get('url')
     if not url:
         return jsonify({"error": "URL is required"}), 400
     try:
-        web_manager.navigate(session_id, url)
-        return jsonify({"message": "Navigation successful"}), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to navigate: {str(e)}"}), 400
-
-@routes.route('/get_page_content/<session_id>', methods=['GET'])
-def get_page_content(session_id):
-    try:
-        content = web_manager.get_page_content(session_id)
+        content = web_manager.load_url_content(url)
         return jsonify({"content": content}), 200
     except Exception as e:
-        return jsonify({"error": f"Failed to get page content: {str(e)}"}), 400
-
-@routes.route('/close_web_session/<session_id>', methods=['DELETE'])
-def close_web_session(session_id):
-    try:
-        web_manager.close_session(session_id)
-        return jsonify({"message": "Web session closed successfully"}), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to close web session: {str(e)}"}), 400
+        return jsonify({"error": f"Failed to load URL content: {str(e)}"}), 500
 
 # Memory tab routes
 @routes.route('/add_memory', methods=['POST'])
