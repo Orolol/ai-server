@@ -3,8 +3,6 @@ import requests
 from ml_api_app.config.ai_providers_config import ai_providers_config
 
 def config_interface():
-    st.subheader("Chat Session Parameters")
-
     if not st.session_state["chat_started"]:
         ai_provider = st.selectbox("AI Provider", list(ai_providers_config.keys()), index=0)
         temperature = st.slider("Temperature", 0.0, 1.0, 0.7, 0.1)

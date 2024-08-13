@@ -1,6 +1,8 @@
 import streamlit as st
 from components.chat_interface import chat_interface
 from components.config_interface import config_interface
+from components.memory_interface import memory_interface
+from components.web_interface import web_interface
 
 st.set_page_config(layout="wide")
 st.title("Chat with AI")
@@ -28,4 +30,14 @@ with left_column:
     chat_interface()
 
 with right_column:
-    config_interface()
+    st.subheader("Workspace")
+    tabs = st.tabs(["Configuration", "Memory", "Web"])
+    
+    with tabs[0]:
+        config_interface()
+    
+    with tabs[1]:
+        memory_interface()
+    
+    with tabs[2]:
+        web_interface()
