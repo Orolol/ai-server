@@ -1,11 +1,16 @@
 import streamlit as st
 import requests
+import time
 
 def web_interface(session_id):
     st.subheader("Web Actions")
     
-    # Automatically fetch and display web action history
-    fetch_and_display_history(session_id)
+    # Create a placeholder for the history
+    history_placeholder = st.empty()
+    
+    # Start a background task to update the history
+    st.write("Fetching web action history...")
+    update_history_background(session_id, history_placeholder)
     
     # Web search functionality
     st.subheader("Web Search")
@@ -39,15 +44,19 @@ def web_interface(session_id):
         else:
             st.warning("Please enter a URL")
 
-def fetch_and_display_history(session_id):
-    response = requests.get(f"http://localhost:5000/get_web_action_history/{session_id}")
-    if response.status_code == 200:
-        actions = response.json().get("actions", [])
-        if actions:
-            for action in actions:
-                with st.expander(f"{action['type']} - {action['timestamp']}"):
-                    st.json(action['details'])
+def update_history_background(session_id, placeholder):
+    while True:
+        response = requests.get(f"http://localhost:5000/get_web_action_history/{session_id}")
+        if response.status_code == 200:
+            actions = response.json().get("actions", [])
+            with placeholder.container():
+                if actions:
+                    for action in actions:
+                        with st.expander(f"{action['type']} - {action['timestamp']}"):
+                            st.json(action['details'])
+                else:
+                    st.info("No web actions found in the history.")
         else:
-            st.info("No web actions found in the history.")
-    else:
-        st.error("Failed to fetch web action history")
+            with placeholder.container():
+                st.error("Failed to fetch web action history")
+        time.sleep(0.5)  # Wait for 500 ms before the next update
