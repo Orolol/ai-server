@@ -7,12 +7,14 @@ from app.models.base_model import ModelFactory
 from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
 from app.workspace.workspace_manager import WorkspaceManager
-from app.web.web_manager import WebManager
+# TODO: Implement WebManager or remove this import if not needed
+# from app.web.web_manager import WebManager
 
 # Store chat sessions
 chat_sessions = {}
 workspace_manager = WorkspaceManager()
-web_manager = WebManager()
+# TODO: Implement WebManager or remove this line if not needed
+# web_manager = WebManager()
 
 routes = Blueprint('routes', __name__)
 
@@ -205,37 +207,38 @@ def get_workspace_configuration(workspace_id):
         return jsonify({"error": f"Failed to get configuration: {str(e)}"}), 400
 
 # Web tab routes
-@routes.route('/get_web_action_history', methods=['GET'])
-def get_web_action_history():
-    try:
-        history = web_manager.get_action_history()
-        return jsonify({"actions": history}), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to get web action history: {str(e)}"}), 500
-
-@routes.route('/web_search', methods=['POST'])
-def web_search():
-    data = request.get_json()
-    query = data.get('query')
-    if not query:
-        return jsonify({"error": "Query is required"}), 400
-    try:
-        results = web_manager.perform_search(query)
-        return jsonify({"results": results}), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to perform web search: {str(e)}"}), 500
-
-@routes.route('/load_url_content', methods=['POST'])
-def load_url_content():
-    data = request.get_json()
-    url = data.get('url')
-    if not url:
-        return jsonify({"error": "URL is required"}), 400
-    try:
-        content = web_manager.load_url_content(url)
-        return jsonify({"content": content}), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to load URL content: {str(e)}"}), 500
+# TODO: Implement WebManager and uncomment these routes when ready
+# @routes.route('/get_web_action_history', methods=['GET'])
+# def get_web_action_history():
+#     try:
+#         history = web_manager.get_action_history()
+#         return jsonify({"actions": history}), 200
+#     except Exception as e:
+#         return jsonify({"error": f"Failed to get web action history: {str(e)}"}), 500
+# 
+# @routes.route('/web_search', methods=['POST'])
+# def web_search():
+#     data = request.get_json()
+#     query = data.get('query')
+#     if not query:
+#         return jsonify({"error": "Query is required"}), 400
+#     try:
+#         results = web_manager.perform_search(query)
+#         return jsonify({"results": results}), 200
+#     except Exception as e:
+#         return jsonify({"error": f"Failed to perform web search: {str(e)}"}), 500
+# 
+# @routes.route('/load_url_content', methods=['POST'])
+# def load_url_content():
+#     data = request.get_json()
+#     url = data.get('url')
+#     if not url:
+#         return jsonify({"error": "URL is required"}), 400
+#     try:
+#         content = web_manager.load_url_content(url)
+#         return jsonify({"content": content}), 200
+#     except Exception as e:
+#         return jsonify({"error": f"Failed to load URL content: {str(e)}"}), 500
 
 # Memory tab routes
 @routes.route('/add_memory', methods=['POST'])
