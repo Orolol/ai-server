@@ -207,12 +207,14 @@ def get_workspace_configuration(workspace_id):
         return jsonify({"error": f"Failed to get configuration: {str(e)}"}), 400
 
 # Web tab routes
-@routes.route('/get_web_action_history', methods=['GET'])
-def get_web_action_history():
+@routes.route('/get_web_action_history/<chatsessionsid>', methods=['GET'])
+def get_web_action_history(chatsessionsid):
+    if not chatsessionsid or chatsessionsid not in chat_sessions:
+        return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
+
     try:
-        # Assuming we have a SilentAgent instance available
-        silent_agent = SilentAgent()
-        history = silent_agent.get_web_action_history()
+        chat_session = chat_sessions[chatsessionsid]
+        history = chat_session.get_web_action_history()
         return jsonify({"actions": history}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to get web action history: {str(e)}"}), 500
