@@ -7,10 +7,12 @@ from app.models.base_model import ModelFactory
 from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
 from app.workspace.workspace_manager import WorkspaceManager
+from app.web.web_manager import WebManager
 
 # Store chat sessions
 chat_sessions = {}
 workspace_manager = WorkspaceManager()
+web_manager = WebManager()
 
 routes = Blueprint('routes', __name__)
 
@@ -201,3 +203,97 @@ def get_workspace_configuration(workspace_id):
         return jsonify(configuration), 200
     except Exception as e:
         return jsonify({"error": f"Failed to get configuration: {str(e)}"}), 400
+
+# Web tab routes
+@routes.route('/create_web_session', methods=['POST'])
+def create_web_session():
+    try:
+        session_id = web_manager.create_session()
+        return jsonify({"session_id": session_id}), 201
+    except Exception as e:
+        return jsonify({"error": f"Failed to create web session: {str(e)}"}), 500
+
+@routes.route('/navigate/<session_id>', methods=['POST'])
+def navigate(session_id):
+    data = request.get_json()
+    url = data.get('url')
+    if not url:
+        return jsonify({"error": "URL is required"}), 400
+    try:
+        web_manager.navigate(session_id, url)
+        return jsonify({"message": "Navigation successful"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to navigate: {str(e)}"}), 400
+
+@routes.route('/get_page_content/<session_id>', methods=['GET'])
+def get_page_content(session_id):
+    try:
+        content = web_manager.get_page_content(session_id)
+        return jsonify({"content": content}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to get page content: {str(e)}"}), 400
+
+@routes.route('/close_web_session/<session_id>', methods=['DELETE'])
+def close_web_session(session_id):
+    try:
+        web_manager.close_session(session_id)
+        return jsonify({"message": "Web session closed successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to close web session: {str(e)}"}), 400
+
+# Memory tab routes
+@routes.route('/add_memory', methods=['POST'])
+def add_memory():
+    data = request.get_json()
+    memory_content = data.get('content')
+    if not memory_content:
+        return jsonify({"error": "Memory content is required"}), 400
+    try:
+        memory = LongTermMemory()
+        memory_id = memory.add_memory(memory_content)
+        return jsonify({"memory_id": memory_id}), 201
+    except Exception as e:
+        return jsonify({"error": f"Failed to add memory: {str(e)}"}), 500
+
+@routes.route('/get_memory/<memory_id>', methods=['GET'])
+def get_memory(memory_id):
+    try:
+        memory = LongTermMemory()
+        memory_content = memory.get_memory(memory_id)
+        return jsonify({"content": memory_content}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to get memory: {str(e)}"}), 404
+
+@routes.route('/update_memory/<memory_id>', methods=['PUT'])
+def update_memory(memory_id):
+    data = request.get_json()
+    new_content = data.get('content')
+    if not new_content:
+        return jsonify({"error": "New memory content is required"}), 400
+    try:
+        memory = LongTermMemory()
+        memory.update_memory(memory_id, new_content)
+        return jsonify({"message": "Memory updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to update memory: {str(e)}"}), 400
+
+@routes.route('/delete_memory/<memory_id>', methods=['DELETE'])
+def delete_memory(memory_id):
+    try:
+        memory = LongTermMemory()
+        memory.delete_memory(memory_id)
+        return jsonify({"message": "Memory deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete memory: {str(e)}"}), 400
+
+@routes.route('/search_memories', methods=['GET'])
+def search_memories():
+    query = request.args.get('query')
+    if not query:
+        return jsonify({"error": "Search query is required"}), 400
+    try:
+        memory = LongTermMemory()
+        results = memory.search_memories(query)
+        return jsonify({"results": results}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to search memories: {str(e)}"}), 500
