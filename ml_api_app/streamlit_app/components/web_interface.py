@@ -9,11 +9,12 @@ def web_interface():
         response = requests.get("http://localhost:5000/get_web_action_history")
         if response.status_code == 200:
             actions = response.json().get("actions", [])
-            for action in actions:
-                st.write(f"Action: {action['type']}")
-                st.write(f"Details: {action['details']}")
-                st.write(f"Timestamp: {action['timestamp']}")
-                st.write("---")
+            if actions:
+                for action in actions:
+                    with st.expander(f"{action['type']} - {action['timestamp']}"):
+                        st.json(action['details'])
+            else:
+                st.info("No web actions found in the history.")
         else:
             st.error("Failed to fetch web action history")
 

@@ -89,4 +89,12 @@ class SilentAgent(ModelAgent):
         return summary
 
     def get_web_action_history(self) -> List[Dict[str, Any]]:
-        return self.memory.search_interactions(["web_search", "url_lookup"], [], None)
+        actions = self.memory.search_interactions(["web_search", "url_lookup"], [], None)
+        return [
+            {
+                "type": action["metadata"]["agent_type"],
+                "details": json.loads(action["document"]),
+                "timestamp": action["metadata"]["date"]
+            }
+            for action in actions
+        ]

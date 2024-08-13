@@ -207,14 +207,15 @@ def get_workspace_configuration(workspace_id):
         return jsonify({"error": f"Failed to get configuration: {str(e)}"}), 400
 
 # Web tab routes
-# TODO: Implement WebManager and uncomment these routes when ready
-# @routes.route('/get_web_action_history', methods=['GET'])
-# def get_web_action_history():
-#     try:
-#         history = web_manager.get_action_history()
-#         return jsonify({"actions": history}), 200
-#     except Exception as e:
-#         return jsonify({"error": f"Failed to get web action history: {str(e)}"}), 500
+@routes.route('/get_web_action_history', methods=['GET'])
+def get_web_action_history():
+    try:
+        # Assuming we have a SilentAgent instance available
+        silent_agent = SilentAgent()
+        history = silent_agent.get_web_action_history()
+        return jsonify({"actions": history}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to get web action history: {str(e)}"}), 500
 # 
 # @routes.route('/web_search', methods=['POST'])
 # def web_search():
