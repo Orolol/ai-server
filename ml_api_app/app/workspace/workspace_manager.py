@@ -50,7 +50,33 @@ class WorkspaceManager:
                 return file
         raise ValueError(f"File {file_name} not found in workspace {workspace_id}")
 
+    def update_file_in_workspace(self, workspace_id: str, file_name: str, new_content: str) -> None:
+        if workspace_id not in self.workspaces:
+            raise ValueError(f"Workspace with id {workspace_id} not found")
+        for file in self.workspaces[workspace_id]["files"]:
+            if file["name"] == file_name:
+                file["content"] = new_content
+                return
+        raise ValueError(f"File {file_name} not found in workspace {workspace_id}")
+
+    def delete_file_from_workspace(self, workspace_id: str, file_name: str) -> None:
+        if workspace_id not in self.workspaces:
+            raise ValueError(f"Workspace with id {workspace_id} not found")
+        self.workspaces[workspace_id]["files"] = [
+            file for file in self.workspaces[workspace_id]["files"] if file["name"] != file_name
+        ]
+
+    def list_files_in_workspace(self, workspace_id: str) -> List[str]:
+        if workspace_id not in self.workspaces:
+            raise ValueError(f"Workspace with id {workspace_id} not found")
+        return [file["name"] for file in self.workspaces[workspace_id]["files"]]
+
     def update_workspace_configuration(self, workspace_id: str, configuration: Dict[str, Any]) -> None:
         if workspace_id not in self.workspaces:
             raise ValueError(f"Workspace with id {workspace_id} not found")
         self.workspaces[workspace_id]["configuration"].update(configuration)
+
+    def get_workspace_configuration(self, workspace_id: str) -> Dict[str, Any]:
+        if workspace_id not in self.workspaces:
+            raise ValueError(f"Workspace with id {workspace_id} not found")
+        return self.workspaces[workspace_id]["configuration"]
