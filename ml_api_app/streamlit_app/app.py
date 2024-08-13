@@ -40,4 +40,4 @@ with right_column:
         memory_interface()
     
     with tabs[2]:
-        web_interface()
+        web_interface(st.session_state.get("chatsessionsid"))
