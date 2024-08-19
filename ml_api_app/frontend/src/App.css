@@ -1,40 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f0f2f5;
+}
+
 .App {
   text-align: center;
-  font-family: Arial, sans-serif;
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #1a73e8;
   padding: 20px;
   color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.tab-container {
+  display: flex;
+  justify-content: center;
+  background-color: white;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab {
+  background-color: transparent;
+  border: none;
+  color: #5f6368;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.tab:hover {
+  background-color: #f1f3f4;
+}
+
+.tab.active {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+  font-weight: 700;
 }
 
 .main-container {
-  display: flex;
-  justify-content: space-between;
+  max-width: 1200px;
+  margin: 20px auto;
   padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.chat-container {
-  flex: 2;
-  margin-right: 20px;
-}
-
-.sidebar {
-  flex: 1;
-}
-
-.config-interface,
-.memory-interface,
-.web-interface {
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
 }
 
 button {
-  background-color: #4CAF50;
+  background-color: #1a73e8;
   border: none;
   color: white;
   padding: 10px 20px;
@@ -44,18 +91,10 @@ button {
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
-input[type="text"],
-input[type="number"],
-select,
-textarea {
-  width: 100%;
-  padding: 12px 20px;
-  margin: 8px 0;
-  display: inline-block;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
+button:hover {
+  background-color: #185abc;
 }
