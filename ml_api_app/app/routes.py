@@ -95,11 +95,16 @@ def send_message():
     print(f"Received data to send message: {data}")
 
     chatsessionsid = data.get("chatsessionsid")
+    message = data.get("message")
+    
     if not chatsessionsid or chatsessionsid not in chat_sessions:
         return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
+    
+    if not message:
+        return jsonify({"error": "Missing message"}), 400
 
     chat_session = chat_sessions[chatsessionsid]
-    response = chat_session.process_input(data)
+    response = chat_session.process_input({"prompt": message})
     print(f"Chat session response: {response}")
 
     # Save the updated session

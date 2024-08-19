@@ -18,7 +18,9 @@ class ActionOrganizerAgent(Agent):
         self.preprompt = template.render({"date": datetime.datetime.now().strftime("%Y-%m-%d")})
 
     def act(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        message = data['prompt']
+        message = data.get('prompt') or data.get('message')
+        if not message:
+            raise ValueError("No 'prompt' or 'message' found in the input data")
         actions_result = self.organize_actions(message)
         return actions_result
 
