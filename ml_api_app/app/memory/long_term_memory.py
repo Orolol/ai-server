@@ -10,20 +10,28 @@ logger = logging.getLogger(__name__)
 
 class LongTermMemory:
     def __init__(self, host=None, port=None):
-        host = host or os.getenv("CHROMADB_HOST", "localhost")
-        port = port or int(os.getenv("CHROMADB_PORT", 8000))
-        logger.info(f"Attempting to connect to ChromaDB at {host}:{port}")
-        print(f"Attempting to connect to ChromaDB at {host}:{port}")
+        self.host = host or os.getenv("CHROMADB_HOST", "localhost")
+        self.port = port or int(os.getenv("CHROMADB_PORT", 8000))
+        logger.info(f"Attempting to connect to ChromaDB at {self.host}:{self.port}")
+        print(f"Attempting to connect to ChromaDB at {self.host}:{self.port}")
         
+        self.client = None
+        self.collection = None
+        self._connect_and_initialize()
+
+    def _connect_and_initialize(self):
         try:
-            self.client = chromadb.HttpClient(host=host, port=port)
+            self.client = chromadb.HttpClient(host=self.host, port=self.port)
             self._initialize_collection()
-            logger.info(f"Successfully connected to ChromaDB at {host}:{port}")
+            logger.info(f"Successfully connected to ChromaDB at {self.host}:{self.port}")
         except Exception as e:
-            logger.error(f"Failed to connect to ChromaDB at {host}:{port} - {str(e)}", exc_info=True)
+            logger.error(f"Failed to connect to ChromaDB at {self.host}:{self.port} - {str(e)}", exc_info=True)
             raise ConnectionError(f"Unable to establish connection with ChromaDB: {str(e)}")
 
     def _initialize_collection(self):
+        if not self.client:
+            raise RuntimeError("ChromaDB client is not initialized")
+
         try:
             collections = self.client.list_collections()
             if not collections:
@@ -39,7 +47,13 @@ class LongTermMemory:
             logger.error(f"Failed to initialize collection - {str(e)}", exc_info=True)
             raise RuntimeError(f"Failed to initialize ChromaDB collection: {str(e)}")
 
+    def _ensure_connection(self):
+        if not self.client or not self.collection:
+            logger.warning("ChromaDB connection lost. Attempting to reconnect...")
+            self._connect_and_initialize()
+
     def store_interaction(self, agent_type, interaction, keywords):
+        self._ensure_connection()
         try:
             date = datetime.now().isoformat()
             self.collection.add(
