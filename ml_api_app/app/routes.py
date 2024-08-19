@@ -8,12 +8,10 @@ from app.agents.action_organizer_agent import ActionOrganizerAgent
 from app.models.base_model import ModelFactory
 from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
-from app.workspace.workspace_manager import WorkspaceManager
 from app.session_storage import SessionStorage
 
 # Store chat sessions
 chat_sessions = {}
-workspace_manager = WorkspaceManager()
 session_storage = SessionStorage()
 
 routes = Blueprint('routes', __name__)
@@ -153,118 +151,6 @@ def clear_memory():
         return jsonify({"message": "Memory cleared successfully"}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to clear memory: {str(e)}"}), 500
-
-@routes.route('/create_workspace', methods=['POST'])
-def create_workspace():
-    data = request.get_json()
-    workspace_name = data.get('workspace_name')
-    if not workspace_name:
-        return jsonify({"error": "Workspace name is required"}), 400
-    
-    try:
-        workspace_id = workspace_manager.create_workspace(workspace_name)
-        return jsonify({"workspace_id": workspace_id}), 201
-    except Exception as e:
-        return jsonify({"error": f"Failed to create workspace: {str(e)}"}), 500
-
-@routes.route('/get_workspace/<workspace_id>', methods=['GET'])
-def get_workspace(workspace_id):
-    try:
-        workspace = workspace_manager.get_workspace(workspace_id)
-        return jsonify(workspace), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to get workspace: {str(e)}"}), 404
-
-@routes.route('/update_workspace/<workspace_id>', methods=['PUT'])
-def update_workspace(workspace_id):
-    data = request.get_json()
-    try:
-        updated_workspace = workspace_manager.update_workspace(workspace_id, data)
-        return jsonify(updated_workspace), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to update workspace: {str(e)}"}), 400
-
-@routes.route('/delete_workspace/<workspace_id>', methods=['DELETE'])
-def delete_workspace(workspace_id):
-    try:
-        workspace_manager.delete_workspace(workspace_id)
-        return jsonify({"message": "Workspace deleted successfully"}), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to delete workspace: {str(e)}"}), 400
-
-@routes.route('/list_workspaces', methods=['GET'])
-def list_workspaces():
-    try:
-        workspaces = workspace_manager.list_workspaces()
-        return jsonify(workspaces), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to list workspaces: {str(e)}"}), 500
-
-@routes.route('/add_file/<workspace_id>', methods=['POST'])
-def add_file_to_workspace(workspace_id):
-    data = request.get_json()
-    file_name = data.get('file_name')
-    file_content = data.get('file_content')
-    if not file_name or not file_content:
-        return jsonify({"error": "File name and content are required"}), 400
-    try:
-        workspace_manager.add_file_to_workspace(workspace_id, file_name, file_content)
-        return jsonify({"message": "File added successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": f"Failed to add file: {str(e)}"}), 400
-
-@routes.route('/get_file/<workspace_id>/<file_name>', methods=['GET'])
-def get_file_from_workspace(workspace_id, file_name):
-    try:
-        file = workspace_manager.get_file_from_workspace(workspace_id, file_name)
-        return jsonify(file), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to get file: {str(e)}"}), 404
-
-@routes.route('/update_file/<workspace_id>/<file_name>', methods=['PUT'])
-def update_file_in_workspace(workspace_id, file_name):
-    data = request.get_json()
-    new_content = data.get('new_content')
-    if not new_content:
-        return jsonify({"error": "New content is required"}), 400
-    try:
-        workspace_manager.update_file_in_workspace(workspace_id, file_name, new_content)
-        return jsonify({"message": "File updated successfully"}), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to update file: {str(e)}"}), 400
-
-@routes.route('/delete_file/<workspace_id>/<file_name>', methods=['DELETE'])
-def delete_file_from_workspace(workspace_id, file_name):
-    try:
-        workspace_manager.delete_file_from_workspace(workspace_id, file_name)
-        return jsonify({"message": "File deleted successfully"}), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to delete file: {str(e)}"}), 400
-
-@routes.route('/list_files/<workspace_id>', methods=['GET'])
-def list_files_in_workspace(workspace_id):
-    try:
-        files = workspace_manager.list_files_in_workspace(workspace_id)
-        return jsonify(files), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to list files: {str(e)}"}), 400
-
-@routes.route('/update_configuration/<workspace_id>', methods=['PUT'])
-def update_workspace_configuration(workspace_id):
-    data = request.get_json()
-    try:
-        workspace_manager.update_workspace_configuration(workspace_id, data)
-        return jsonify({"message": "Configuration updated successfully"}), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to update configuration: {str(e)}"}), 400
-
-@routes.route('/get_configuration/<workspace_id>', methods=['GET'])
-def get_workspace_configuration(workspace_id):
-    try:
-        configuration = workspace_manager.get_workspace_configuration(workspace_id)
-        return jsonify(configuration), 200
-    except Exception as e:
-        return jsonify({"error": f"Failed to get configuration: {str(e)}"}), 400
 
 # Web tab routes
 @routes.route('/get_web_action_history/<chatsessionsid>', methods=['GET'])
