@@ -1,13 +1,31 @@
 import uuid
 from typing import List, Dict, Any
+import json
 
 class ChatSession:
-    def __init__(self, silent_agent, vocal_agent, action_organizer_agent):
-        self.session_id = str(uuid.uuid4())
+    def __init__(self, silent_agent, vocal_agent, action_organizer_agent, session_id=None, conversation_history=None):
+        self.session_id = session_id or str(uuid.uuid4())
         self.silent_agent = silent_agent
         self.vocal_agent = vocal_agent
         self.action_organizer_agent = action_organizer_agent
         self.web_action_history: List[Dict[str, Any]] = []
+        if conversation_history:
+            self.vocal_agent.conversation_history = conversation_history
+
+    def to_dict(self):
+        return {
+            'session_id': self.session_id,
+            'conversation_history': self.vocal_agent.conversation_history,
+            'web_action_history': self.web_action_history
+        }
+
+    @classmethod
+    def from_dict(cls, data, silent_agent, vocal_agent, action_organizer_agent):
+        session = cls(silent_agent, vocal_agent, action_organizer_agent, 
+                      session_id=data['session_id'], 
+                      conversation_history=data['conversation_history'])
+        session.web_action_history = data['web_action_history']
+        return session
 
     def process_input(self, data):
         # Use ActionOrganizerAgent to analyze and execute actions

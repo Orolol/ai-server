@@ -9,14 +9,12 @@ from app.models.base_model import ModelFactory
 from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
 from app.workspace.workspace_manager import WorkspaceManager
-# TODO: Implement WebManager or remove this import if not needed
-# from app.web.web_manager import WebManager
+from app.session_storage import SessionStorage
 
 # Store chat sessions
 chat_sessions = {}
 workspace_manager = WorkspaceManager()
-# TODO: Implement WebManager or remove this line if not needed
-# web_manager = WebManager()
+session_storage = SessionStorage()
 
 routes = Blueprint('routes', __name__)
 
@@ -53,24 +51,33 @@ def start_chat():
 
     ai_provider = data.get("ai_provider", "openai")
     system_message = data.get("system_message", "")
+    session_id = data.get("session_id")
 
     try:
-        print(f"System message: {system_message}")
-        print("Creating chat session")
-        strong_model = ModelFactory.create_model(ai_provider, "strong")
-        print(
-            f"Model created: {ai_provider} (strong) {strong_model.model_name}")
-        weak_model = ModelFactory.create_model(ai_provider, "weak")
-        print(f"Model created: {ai_provider} (weak) {weak_model.model_name}")
-        vocal_agent = create_agent("chat", strong_model, system_message)
-        print("Vocal agent created")
-        silent_agent = SilentAgent(
-            memory_db_path="localhost", ai_provider=ai_provider, strength="weak")
-        print("Silent agent created")
-        action_organizer_agent = ActionOrganizerAgent(strong_model, silent_agent)
-        print("Action organizer agent created")
-        chat_session = ChatSession(silent_agent, vocal_agent, action_organizer_agent)
-        print(f"Chat session created with ID: {chat_session.session_id}")
+        if session_id:
+            # Load existing session
+            chat_session = session_storage.load_session(session_id, None, None, None)
+            if not chat_session:
+                return jsonify({"error": "Session not found"}), 404
+            print(f"Loaded existing chat session with ID: {chat_session.session_id}")
+        else:
+            # Create new session
+            print(f"System message: {system_message}")
+            print("Creating chat session")
+            strong_model = ModelFactory.create_model(ai_provider, "strong")
+            print(f"Model created: {ai_provider} (strong) {strong_model.model_name}")
+            weak_model = ModelFactory.create_model(ai_provider, "weak")
+            print(f"Model created: {ai_provider} (weak) {weak_model.model_name}")
+            vocal_agent = create_agent("chat", strong_model, system_message)
+            print("Vocal agent created")
+            silent_agent = SilentAgent(
+                memory_db_path="localhost", ai_provider=ai_provider, strength="weak")
+            print("Silent agent created")
+            action_organizer_agent = ActionOrganizerAgent(strong_model, silent_agent)
+            print("Action organizer agent created")
+            chat_session = ChatSession(silent_agent, vocal_agent, action_organizer_agent)
+            print(f"Chat session created with ID: {chat_session.session_id}")
+
         chat_sessions[chat_session.session_id] = chat_session
     except ValueError as e:
         print(f"Error starting chat: {e}")
@@ -94,7 +101,47 @@ def send_message():
     chat_session = chat_sessions[chatsessionsid]
     response = chat_session.process_input(data)
     print(f"Chat session response: {response}")
+
+    # Save the updated session
+    session_storage.save_session(chat_session)
+
     return jsonify({"response": response})
+
+@routes.route('/save_session', methods=['POST'])
+def save_session():
+    data = request.get_json()
+    chatsessionsid = data.get("chatsessionsid")
+    
+    if not chatsessionsid or chatsessionsid not in chat_sessions:
+        return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
+
+    chat_session = chat_sessions[chatsessionsid]
+    session_storage.save_session(chat_session)
+    
+    return jsonify({"message": "Session saved successfully"}), 200
+
+@routes.route('/load_session/<session_id>', methods=['GET'])
+def load_session(session_id):
+    chat_session = session_storage.load_session(session_id, None, None, None)
+    
+    if not chat_session:
+        return jsonify({"error": "Session not found"}), 404
+
+    chat_sessions[chat_session.session_id] = chat_session
+    
+    return jsonify({"chatsessionsid": chat_session.session_id}), 200
+
+@routes.route('/list_sessions', methods=['GET'])
+def list_sessions():
+    sessions = session_storage.list_sessions()
+    return jsonify({"sessions": sessions}), 200
+
+@routes.route('/delete_session/<session_id>', methods=['DELETE'])
+def delete_session(session_id):
+    session_storage.delete_session(session_id)
+    if session_id in chat_sessions:
+        del chat_sessions[session_id]
+    return jsonify({"message": "Session deleted successfully"}), 200
 
 @routes.route('/clear_memory', methods=['POST'])
 def clear_memory():
