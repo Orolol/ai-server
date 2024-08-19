@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './ChatInterface.css';
 
 function ChatInterface({ chatSessionId, messages, setMessages }) {
   const [userInput, setUserInput] = useState('');
@@ -31,7 +32,7 @@ function ChatInterface({ chatSessionId, messages, setMessages }) {
       <div className="message-container">
         {messages.map((message, index) => (
           <div key={index} className={`message ${message.role}`}>
-            {message.content}
+            <strong>{message.role}:</strong> {message.content}
           </div>
         ))}
       </div>
@@ -41,6 +42,7 @@ function ChatInterface({ chatSessionId, messages, setMessages }) {
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="Type your message..."
+          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
         />
         <button onClick={sendMessage}>Send</button>
       </div>

@@ -3,6 +3,7 @@ import ChatInterface from './components/ChatInterface';
 import ConfigInterface from './components/ConfigInterface';
 import MemoryInterface from './components/MemoryInterface';
 import WebInterface from './components/WebInterface';
+import './App.css';
 
 function App() {
   const [chatSessionId, setChatSessionId] = useState(null);
@@ -10,7 +11,9 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Chat with AI</h1>
+      <header className="App-header">
+        <h1>ML API Chat Interface</h1>
+      </header>
       <div className="main-container">
         <div className="chat-container">
           <ChatInterface
