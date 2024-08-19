@@ -143,6 +143,15 @@ def delete_session(session_id):
         del chat_sessions[session_id]
     return jsonify({"message": "Session deleted successfully"}), 200
 
+@routes.route('/get_messages/<chatsessionsid>', methods=['GET'])
+def get_messages(chatsessionsid):
+    if not chatsessionsid or chatsessionsid not in chat_sessions:
+        return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
+
+    chat_session = chat_sessions[chatsessionsid]
+    messages = chat_session.get_messages()
+    return jsonify({"messages": messages}), 200
+
 @routes.route('/clear_memory', methods=['POST'])
 def clear_memory():
     try:
