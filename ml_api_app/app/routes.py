@@ -217,6 +217,7 @@ def get_web_action_history(chatsessionsid):
         history = chat_session.get_web_action_history()
         return jsonify({"actions": history}), 200
     except Exception as e:
+        print(f"Failed to get web action history: {str(e)}")
         return jsonify({"error": f"Failed to get web action history: {str(e)}"}), 500
 # 
 # @routes.route('/web_search', methods=['POST'])
