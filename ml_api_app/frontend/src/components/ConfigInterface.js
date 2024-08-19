@@ -14,7 +14,7 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
 
   const fetchExistingSessions = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/chat/sessions');
+      const response = await axios.get('http://localhost:5000/list_sessions');
       setExistingSessions(response.data.sessions);
     } catch (error) {
       console.error('Failed to fetch existing sessions:', error);
@@ -23,7 +23,7 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
 
   const startChatSession = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/chat/start', {
+      const response = await axios.post('http://localhost:5000/start_chat', {
         ai_provider: aiProvider,
         strength: strength,
         system_message: systemMessage
@@ -41,7 +41,7 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
   const reconnectToSession = async () => {
     if (!selectedSession) return;
     try {
-      const response = await axios.get(`http://localhost:5000/api/chat/load/${selectedSession}`);
+      const response = await axios.get(`http://localhost:5000/load_session/${selectedSession}`);
       if (response.data.chatsessionsid) {
         setChatSessionId(response.data.chatsessionsid);
         // You might want to fetch messages for this session here
@@ -53,7 +53,7 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
 
   const clearMemory = async () => {
     try {
-      await axios.post('http://localhost:5000/api/memory/clear');
+      await axios.post('http://localhost:5000/clear_memory');
       setMessages([]);
     } catch (error) {
       console.error('Failed to clear memory:', error);
