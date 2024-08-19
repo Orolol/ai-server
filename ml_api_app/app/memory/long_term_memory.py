@@ -10,22 +10,34 @@ logger = logging.getLogger(__name__)
 
 class LongTermMemory:
     def __init__(self, host=None, port=None):
+        host = host or os.getenv("CHROMADB_HOST", "localhost")
+        port = port or int(os.getenv("CHROMADB_PORT", 8000))
+        logger.info(f"Attempting to connect to ChromaDB at {host}:{port}")
+        print(f"Attempting to connect to ChromaDB at {host}:{port}")
+        
         try:
-            host = host or os.getenv("CHROMADB_HOST", "localhost")
-            port = port or int(os.getenv("CHROMADB_PORT", 8000))
-            logger.info(f"Connecting to ChromaDB at {host}:{port}")
-            print(f"Connecting to ChromaDB at {host}:{port}")
             self.client = chromadb.HttpClient(host=host, port=port)
-            collections = [col.name for col in self.client.list_collections()]
-            if "interactions" not in collections:
+            self._initialize_collection()
+            logger.info(f"Successfully connected to ChromaDB at {host}:{port}")
+        except Exception as e:
+            logger.error(f"Failed to connect to ChromaDB at {host}:{port} - {str(e)}", exc_info=True)
+            raise ConnectionError(f"Unable to establish connection with ChromaDB: {str(e)}")
+
+    def _initialize_collection(self):
+        try:
+            collections = self.client.list_collections()
+            if not collections:
+                logger.info("No collections found. Creating 'interactions' collection.")
+                self.collection = self.client.create_collection("interactions")
+            elif "interactions" not in [col.name for col in collections]:
+                logger.info("'interactions' collection not found. Creating it.")
                 self.collection = self.client.create_collection("interactions")
             else:
+                logger.info("'interactions' collection found. Retrieving it.")
                 self.collection = self.client.get_collection("interactions")
-            logger.info(f"Connected to ChromaDB at {host}:{port}")
         except Exception as e:
-            logger.error(
-                f"Failed to connect to ChromaDB at {host}:{port} - {str(e)}", exc_info=True)
-            raise
+            logger.error(f"Failed to initialize collection - {str(e)}", exc_info=True)
+            raise RuntimeError(f"Failed to initialize ChromaDB collection: {str(e)}")
 
     def store_interaction(self, agent_type, interaction, keywords):
         try:
