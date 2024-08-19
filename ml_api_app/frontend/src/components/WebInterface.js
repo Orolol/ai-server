@@ -14,7 +14,7 @@ function WebInterface({ chatSessionId }) {
 
   const fetchWebActions = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/get_web_action_history/${chatSessionId}`);
+      const response = await axios.get(`http://localhost:5000/api/web/actions/${chatSessionId}`);
       setWebActions(response.data.actions);
     } catch (error) {
       console.error('Failed to fetch web actions:', error);
@@ -23,7 +23,7 @@ function WebInterface({ chatSessionId }) {
 
   const performWebSearch = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/web_search', {
+      const response = await axios.post('http://localhost:5000/api/web/search', {
         query: searchQuery,
         session_id: chatSessionId
       });
@@ -36,7 +36,7 @@ function WebInterface({ chatSessionId }) {
 
   const loadUrlContent = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/load_url_content', {
+      const response = await axios.post('http://localhost:5000/api/web/load_url', {
         url,
         session_id: chatSessionId
       });

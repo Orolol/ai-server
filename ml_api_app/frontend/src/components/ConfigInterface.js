@@ -3,21 +3,19 @@ import axios from 'axios';
 
 function ConfigInterface({ setChatSessionId, setMessages }) {
   const [aiProvider, setAiProvider] = useState('openai');
-  const [temperature, setTemperature] = useState(0.7);
-  const [maxLength, setMaxLength] = useState(1024);
+  const [strength, setStrength] = useState('weak');
   const [systemMessage, setSystemMessage] = useState('');
 
   const startChatSession = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/start_chat', {
+      const response = await axios.post('http://localhost:5000/api/chat/start', {
         ai_provider: aiProvider,
-        temperature,
-        max_length: maxLength,
+        strength: strength,
         system_message: systemMessage
       });
 
-      if (response.data.chatsessionsid) {
-        setChatSessionId(response.data.chatsessionsid);
+      if (response.data.session_id) {
+        setChatSessionId(response.data.session_id);
         setMessages([]);
       }
     } catch (error) {
@@ -27,7 +25,7 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
 
   const clearMemory = async () => {
     try {
-      await axios.post('http://localhost:5000/clear_memory');
+      await axios.post('http://localhost:5000/api/memory/clear');
       setMessages([]);
     } catch (error) {
       console.error('Failed to clear memory:', error);
@@ -40,20 +38,13 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
       <select value={aiProvider} onChange={(e) => setAiProvider(e.target.value)}>
         <option value="openai">OpenAI</option>
         <option value="anthropic">Anthropic</option>
+        <option value="huggingface">HuggingFace</option>
       </select>
-      <input
-        type="range"
-        min="0"
-        max="1"
-        step="0.1"
-        value={temperature}
-        onChange={(e) => setTemperature(parseFloat(e.target.value))}
-      />
-      <input
-        type="number"
-        value={maxLength}
-        onChange={(e) => setMaxLength(parseInt(e.target.value))}
-      />
+      <select value={strength} onChange={(e) => setStrength(e.target.value)}>
+        <option value="weak">Weak</option>
+        <option value="medium">Medium</option>
+        <option value="strong">Strong</option>
+      </select>
       <textarea
         value={systemMessage}
         onChange={(e) => setSystemMessage(e.target.value)}

@@ -9,9 +9,9 @@ function ChatInterface({ chatSessionId, messages, setMessages }) {
     if (!userInput.trim() || !chatSessionId) return;
 
     try {
-      const response = await axios.post('http://localhost:5000/send_message', {
-        chatsessionsid: chatSessionId,
-        prompt: userInput
+      const response = await axios.post('http://localhost:5000/api/chat/message', {
+        session_id: chatSessionId,
+        message: userInput
       });
 
       if (response.data.response) {
