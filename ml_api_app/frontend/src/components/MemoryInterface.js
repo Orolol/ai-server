@@ -11,8 +11,8 @@ function MemoryInterface() {
 
   const fetchMemories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/memory/search', {
-        params: { query: searchQuery }
+      const response = await axios.get('http://localhost:5000/memory/search', {
+        params: { keywords: searchQuery }
       });
       setMemories(response.data.results);
     } catch (error) {
