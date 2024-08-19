@@ -24,12 +24,33 @@ body {
   font-weight: 700;
 }
 
+.main-container {
+  display: flex;
+  max-width: 1200px;
+  margin: 20px auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.chat-container {
+  flex: 1;
+  padding: 20px;
+  border-right: 1px solid #dadce0;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .tab-container {
   display: flex;
   justify-content: center;
-  background-color: white;
+  background-color: #f1f3f4;
   padding: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .tab {
@@ -48,7 +69,7 @@ body {
 }
 
 .tab:hover {
-  background-color: #f1f3f4;
+  background-color: #e8f0fe;
 }
 
 .tab.active {
@@ -57,13 +78,10 @@ body {
   font-weight: 700;
 }
 
-.main-container {
-  max-width: 1200px;
-  margin: 20px auto;
+.tab-content {
+  flex: 1;
   padding: 20px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
 }
 
 input[type="text"],
