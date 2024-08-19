@@ -1,4 +1,5 @@
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint, send_from_directory
+from flask_cors import CORS
 from app.agents.base_agent import ChatAgent, CodingAgent
 from app.agents.chat_session import ChatSession
 from app.agents.silent_agent import SilentAgent
@@ -22,6 +23,15 @@ routes = Blueprint('routes', __name__)
 def init_routes(app):
     print("Initializing routes")
     app.register_blueprint(routes)
+    CORS(app)  # Enable CORS for all routes
+
+@routes.route('/', defaults={'path': ''})
+@routes.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 
 def create_agent(agent_type, model, system_message=""):
