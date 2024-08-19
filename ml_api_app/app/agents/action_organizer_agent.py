@@ -56,6 +56,12 @@ class ActionOrganizerAgent(Agent):
         self.update_preprompt()  # Ensure the date is current
         analysis_prompt = f"""Analyze this message and determine if any actions are needed: {message}
 
+        Reuse informatiosn from previous actions if needed, like URLS to perform web search.
+        Make sure that you have all the information needed to answer the user's query.
+        If the user asks for information that you don't know, you an peroform a web search to find the information.
+        If the user asks for information that you don't know but you thinks are present on website from previous search, do a URL lookup.
+        If you plan  many actions, consider breaking them down into smaller steps.
+        
         Return a JSON object with the following structure:
         {{
             "actions": [
