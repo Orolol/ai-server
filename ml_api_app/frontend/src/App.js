@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import ChatInterface from './components/ChatInterface';
 import ConfigInterface from './components/ConfigInterface';
 import MemoryInterface from './components/MemoryInterface';
@@ -9,6 +10,21 @@ function App() {
   const [chatSessionId, setChatSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [activeTab, setActiveTab] = useState('config');
+
+  useEffect(() => {
+    if (chatSessionId) {
+      fetchMessages();
+    }
+  }, [chatSessionId]);
+
+  const fetchMessages = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/get_messages/${chatSessionId}`);
+      setMessages(response.data.messages);
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    }
+  };
 
   const renderActiveTab = () => {
     switch (activeTab) {

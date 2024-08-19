@@ -79,6 +79,8 @@ def start_chat():
             print(f"Chat session created with ID: {chat_session.session_id}")
 
         chat_sessions[chat_session.session_id] = chat_session
+        # Save the session
+        session_storage.save_session(chat_session)
     except ValueError as e:
         print(f"Error starting chat: {e}")
         return jsonify({"error": str(e)}), 400
