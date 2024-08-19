@@ -60,3 +60,12 @@ class ChatSession:
 
     def get_web_action_history(self) -> List[Dict[str, Any]]:
         return self.web_action_history
+
+    def get_messages(self) -> List[Dict[str, Any]]:
+        """
+        Retrieve the conversation history.
+        
+        Returns:
+            List[Dict[str, Any]]: A list of message dictionaries, each containing 'role' and 'content'.
+        """
+        return self.vocal_agent.conversation_history
