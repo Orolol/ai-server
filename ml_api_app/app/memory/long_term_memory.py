@@ -33,17 +33,16 @@ class LongTermMemory:
             raise RuntimeError("ChromaDB client is not initialized")
 
         try:
-            print("SATE OF THE CLIENT", self.client)
-            collections = self.client.list_collections()
-            if not collections:
-                logger.info("No collections found. Creating 'interactions' collection.")
+            print("STATE OF THE CLIENT", self.client)
+            try:
                 self.collection = self.client.create_collection("long_term_memory")
-            elif "interactions" not in [col.name for col in collections]:
-                logger.info("'interactions' collection not found. Creating it.")
-                self.collection = self.client.create_collection("long_term_memory")
-            else:
-                logger.info("'interactions' collection found. Retrieving it.")
-                self.collection = self.client.get_collection("long_term_memory")
+                logger.info("Created 'long_term_memory' collection.")
+            except Exception as create_error:
+                if "already exists" in str(create_error):
+                    logger.info("'long_term_memory' collection already exists. Retrieving it.")
+                    self.collection = self.client.get_collection("long_term_memory")
+                else:
+                    raise create_error
         except Exception as e:
             logger.error(f"Failed to initialize collection - {str(e)}", exc_info=True)
             raise RuntimeError(f"Failed to initialize ChromaDB collection: {str(e)}")
