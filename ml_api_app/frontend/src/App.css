@@ -1,14 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
-body {
+html, body {
   margin: 0;
   padding: 0;
+  height: 100%;
   font-family: 'Roboto', sans-serif;
   background-color: #f0f2f5;
 }
 
 .App {
   text-align: center;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .App-header {
@@ -26,10 +30,8 @@ body {
 
 .main-container {
   display: flex;
-  max-width: 1200px;
-  margin: 20px auto;
+  flex: 1;
   background-color: white;
-  border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
