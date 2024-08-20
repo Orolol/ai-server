@@ -155,7 +155,7 @@ def list_sessions():
     sessions = session_storage.list_sessions()
     session_details = []
     for session in sessions:
-        chat_session = session_storage.load_session(session, None, None, None)
+        chat_session = session_storage.load_session(session, None)
         if chat_session:
             session_details.append({
                 "id": chat_session.session_id,
