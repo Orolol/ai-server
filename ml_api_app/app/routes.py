@@ -59,7 +59,8 @@ def start_chat():
     try:
         if session_id:
             # Load existing session
-            chat_session = session_storage.load_session(session_id, None, None, None)
+            ai_provider = data.get("ai_provider", "openai")
+            chat_session = session_storage.load_session(session_id, ai_provider)
             if not chat_session:
                 return jsonify({"error": "Session not found"}), 404
             print(f"Loaded existing chat session with ID: {chat_session.session_id}")

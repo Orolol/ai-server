@@ -12,12 +12,20 @@ class SessionStorage:
         with open(filename, 'w') as f:
             json.dump(session.to_dict(), f)
 
-    def load_session(self, session_id, silent_agent, vocal_agent, action_organizer_agent):
+    def load_session(self, session_id, ai_provider):
         filename = f"{self.storage_dir}/{session_id}.json"
         if not os.path.exists(filename):
             return None
         with open(filename, 'r') as f:
             data = json.load(f)
+        
+        # Initialize agents
+        strong_model = ModelFactory.create_model(ai_provider, "strong")
+        weak_model = ModelFactory.create_model(ai_provider, "weak")
+        vocal_agent = ChatAgent(strong_model)
+        silent_agent = SilentAgent(memory_db_path="localhost", ai_provider=ai_provider, strength="weak")
+        action_organizer_agent = ActionOrganizerAgent(strong_model, silent_agent)
+        
         return ChatSession.from_dict(data, silent_agent, vocal_agent, action_organizer_agent)
 
     def delete_session(self, session_id):
