@@ -82,15 +82,6 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
     }
   };
 
-  const clearMemory = async () => {
-    try {
-      await axios.post('http://localhost:5000/clear_memory');
-      setMessages([]);
-    } catch (error) {
-      console.error('Failed to clear memory:', error);
-    }
-  };
-
   return (
     <div className="config-interface">
       <h2>Configuration</h2>
