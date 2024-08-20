@@ -22,6 +22,8 @@ class ChatSession:
 
     @classmethod
     def from_dict(cls, data, silent_agent, vocal_agent, action_organizer_agent):
+        if vocal_agent is None:
+            raise ValueError("vocal_agent must be provided and cannot be None")
         session = cls(silent_agent, vocal_agent, action_organizer_agent, 
                       session_id=data['session_id'], 
                       conversation_history=data['conversation_history'])
