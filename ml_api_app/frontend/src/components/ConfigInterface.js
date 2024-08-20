@@ -12,7 +12,6 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
 
   useEffect(() => {
     fetchExistingSessions();
-    fetchConfigOptions();
   }, []);
 
   const fetchConfigOptions = async () => {
@@ -40,7 +39,6 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
     try {
       const response = await axios.post('http://localhost:5000/start_chat', {
         ai_provider: aiProvider,
-        strength: strength,
         system_message: systemMessage
       });
 
@@ -78,27 +76,30 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
   return (
     <div className="config-interface">
       <h2>Configuration</h2>
-      <h3>Start New Session</h3>
-      <select value={aiProvider} onChange={(e) => setAiProvider(e.target.value)}>
-        {aiProviders.map((provider) => (
-          <option key={provider} value={provider}>
-            {provider}
-          </option>
-        ))}
-      </select>
-      <select value={strength} onChange={(e) => setStrength(e.target.value)}>
-        {strengths.map((str) => (
-          <option key={str} value={str}>
-            {str}
-          </option>
-        ))}
-      </select>
-      <textarea
-        value={systemMessage}
-        onChange={(e) => setSystemMessage(e.target.value)}
-        placeholder="System Message"
-      />
-      <button onClick={startChatSession}>Start New Chat Session</button>
+      {chatSessionId ? (
+        <div>
+          <h3>Current Session</h3>
+          <p>Session ID: {chatSessionId}</p>
+          <button onClick={clearMemory}>Clear Memory</button>
+        </div>
+      ) : (
+        <div>
+          <h3>Start New Session</h3>
+          <select value={aiProvider} onChange={(e) => setAiProvider(e.target.value)}>
+            {aiProviders.map((provider) => (
+              <option key={provider} value={provider}>
+                {provider}
+              </option>
+            ))}
+          </select>
+          <textarea
+            value={systemMessage}
+            onChange={(e) => setSystemMessage(e.target.value)}
+            placeholder="System Message"
+          />
+          <button onClick={startChatSession}>Start New Chat Session</button>
+        </div>
+      )}
       
       <h3>Existing Sessions</h3>
       <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)}>
