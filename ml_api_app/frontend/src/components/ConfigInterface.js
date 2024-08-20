@@ -3,9 +3,7 @@ import axios from 'axios';
 
 function ConfigInterface({ setChatSessionId, setMessages }) {
   const [aiProviders, setAiProviders] = useState([]);
-  const [strengths, setStrengths] = useState([]);
   const [aiProvider, setAiProvider] = useState('');
-  const [strength, setStrength] = useState('');
   const [systemMessage, setSystemMessage] = useState('');
   const [existingSessions, setExistingSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState('');
@@ -18,9 +16,7 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
     try {
       const response = await axios.get('http://localhost:5000/config_options');
       setAiProviders(response.data.ai_providers);
-      setStrengths(response.data.strengths);
       setAiProvider(response.data.ai_providers[0]);
-      setStrength(response.data.strengths[0]);
     } catch (error) {
       console.error('Failed to fetch configuration options:', error);
     }
