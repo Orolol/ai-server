@@ -74,6 +74,9 @@ def start_chat():
             action_organizer_agent = ActionOrganizerAgent(strong_model, silent_agent)
             print("Action organizer agent created")
             chat_session = ChatSession(silent_agent, vocal_agent, action_organizer_agent)
+            chat_session.creation_date = datetime.now().isoformat()
+            chat_session.strong_model = strong_model.model_name
+            chat_session.weak_model = weak_model.model_name
             print(f"Chat session created with ID: {chat_session.session_id}")
 
         chat_sessions[chat_session.session_id] = chat_session
@@ -86,7 +89,12 @@ def start_chat():
         print(f"Unexpected error: {e}")
         return jsonify({"error": f"Unexpected error occurred: {str(e)}"}), 500
 
-    return jsonify({"chatsessionsid": chat_session.session_id})
+    return jsonify({
+        "chatsessionsid": chat_session.session_id,
+        "creation_date": chat_session.creation_date,
+        "strong_model": chat_session.strong_model,
+        "weak_model": chat_session.weak_model
+    })
 
 
 @routes.route('/send_message', methods=['POST'])
@@ -139,7 +147,17 @@ def load_session(session_id):
 @routes.route('/list_sessions', methods=['GET'])
 def list_sessions():
     sessions = session_storage.list_sessions()
-    return jsonify({"sessions": sessions}), 200
+    session_details = []
+    for session in sessions:
+        chat_session = session_storage.load_session(session, None, None, None)
+        if chat_session:
+            session_details.append({
+                "id": chat_session.session_id,
+                "creation_date": getattr(chat_session, 'creation_date', 'N/A'),
+                "strong_model": getattr(chat_session, 'strong_model', 'N/A'),
+                "weak_model": getattr(chat_session, 'weak_model', 'N/A')
+            })
+    return jsonify({"sessions": session_details}), 200
 
 @routes.route('/delete_session/<session_id>', methods=['DELETE'])
 def delete_session(session_id):
