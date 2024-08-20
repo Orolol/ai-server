@@ -12,7 +12,7 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
 
   useEffect(() => {
     fetchConfigOptions();
-    fetchExistingSessions();
+    //fetchExistingSessions();
   }, []); // Empty dependency array ensures this effect runs only once on mount
 
   const fetchConfigOptions = async () => {
