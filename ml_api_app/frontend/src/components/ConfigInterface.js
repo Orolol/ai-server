@@ -12,6 +12,10 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
     fetchExistingSessions();
   }, []); // Ensure this useEffect runs only once on mount
 
+  useEffect(() => {
+    fetchConfigOptions();
+  }, []); // Call fetchConfigOptions once on mount
+
   const fetchConfigOptions = async () => {
     try {
       const response = await axios.get('http://localhost:5000/config_options');
