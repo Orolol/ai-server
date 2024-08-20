@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function ConfigInterface({ setChatSessionId, setMessages }) {
+function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
   const [aiProviders, setAiProviders] = useState([]);
   const [aiProvider, setAiProvider] = useState('');
   const [systemMessage, setSystemMessage] = useState('');
