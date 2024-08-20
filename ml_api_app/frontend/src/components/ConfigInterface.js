@@ -9,11 +9,15 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
   const [selectedSession, setSelectedSession] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [sessionInfo, setSessionInfo] = useState(null);
 
   useEffect(() => {
     fetchConfigOptions();
     fetchExistingSessions();
-  }, []); // Empty dependency array ensures this effect runs only once on mount
+    if (chatSessionId) {
+      fetchSessionInfo();
+    }
+  }, [chatSessionId]);
 
   const fetchConfigOptions = async () => {
     if (aiProviders.length === 0) {
@@ -48,6 +52,15 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
     }
   };
 
+  const fetchSessionInfo = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/session_info/${chatSessionId}`);
+      setSessionInfo(response.data);
+    } catch (error) {
+      console.error('Failed to fetch session info:', error);
+    }
+  };
+
   const startChatSession = async () => {
     try {
       const response = await axios.post('http://localhost:5000/start_chat', {
@@ -58,9 +71,11 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
       if (response.data.chatsessionsid) {
         setChatSessionId(response.data.chatsessionsid);
         setMessages([]);
+        fetchSessionInfo();
       }
     } catch (error) {
       console.error('Failed to start chat session:', error);
+      setError('Failed to start chat session. Please try again.');
     }
   };
 
@@ -70,10 +85,14 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
       const response = await axios.get(`http://localhost:5000/load_session/${selectedSession}`);
       if (response.data.chatsessionsid) {
         setChatSessionId(response.data.chatsessionsid);
-        // You might want to fetch messages for this session here
+        fetchSessionInfo();
+        // Fetch messages for this session
+        const messagesResponse = await axios.get(`http://localhost:5000/get_messages/${response.data.chatsessionsid}`);
+        setMessages(messagesResponse.data.messages);
       }
     } catch (error) {
       console.error('Failed to reconnect to session:', error);
+      setError('Failed to reconnect to session. Please try again.');
     }
   };
 
@@ -81,8 +100,23 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
     try {
       await axios.post('http://localhost:5000/clear_memory');
       setMessages([]);
+      setChatSessionId(null);
+      setSessionInfo(null);
     } catch (error) {
       console.error('Failed to clear memory:', error);
+      setError('Failed to clear memory. Please try again.');
+    }
+  };
+
+  const endSession = async () => {
+    try {
+      await axios.post(`http://localhost:5000/end_session/${chatSessionId}`);
+      setChatSessionId(null);
+      setMessages([]);
+      setSessionInfo(null);
+    } catch (error) {
+      console.error('Failed to end session:', error);
+      setError('Failed to end session. Please try again.');
     }
   };
 
@@ -97,6 +131,14 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
             <div>
               <h3>Current Session</h3>
               <p>Session ID: {chatSessionId}</p>
+              {sessionInfo && (
+                <>
+                  <p>AI Provider: {sessionInfo.ai_provider}</p>
+                  <p>Created At: {new Date(sessionInfo.created_at).toLocaleString()}</p>
+                  <p>System Message: {sessionInfo.system_message}</p>
+                </>
+              )}
+              <button onClick={endSession}>End Session</button>
               <button onClick={clearMemory}>Clear Memory</button>
             </div>
           ) : (
@@ -118,19 +160,20 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
             </div>
           )}
           
-          <h3>Existing Sessions</h3>
-          <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)}>
-            <option value="">Select a session</option>
-            {existingSessions.map((session) => (
-              <option key={session.id} value={session.id}>
-                {session.id} - {new Date(session.created_at).toLocaleString()}
-              </option>
-            ))}
-          </select>
-          <button onClick={reconnectToSession}>Reconnect to Session</button>
-          
-          <h3>Memory Management</h3>
-          <button onClick={clearMemory}>Clear Memory</button>
+          {!chatSessionId && (
+            <>
+              <h3>Existing Sessions</h3>
+              <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)}>
+                <option value="">Select a session</option>
+                {existingSessions.map((session) => (
+                  <option key={session.id} value={session.id}>
+                    {session.id} - {new Date(session.created_at).toLocaleString()}
+                  </option>
+                ))}
+              </select>
+              <button onClick={reconnectToSession}>Reconnect to Session</button>
+            </>
+          )}
         </>
       )}
     </div>
