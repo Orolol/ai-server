@@ -9,7 +9,14 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
   const [selectedSession, setSelectedSession] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [sessionInfo, setSessionInfo] = useState(null);
+  const [sessionInfo, setSessionInfo] = useState({
+    chatsessionsid: null,
+    creation_date: null,
+    strong_model: null,
+    weak_model: null,
+    ai_provider: null,
+    system_message: null
+  });
 
   useEffect(() => {
     fetchConfigOptions();
@@ -71,7 +78,14 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
       if (response.data.chatsessionsid) {
         setChatSessionId(response.data.chatsessionsid);
         setMessages([]);
-        fetchSessionInfo();
+        setSessionInfo({
+          chatsessionsid: response.data.chatsessionsid,
+          creation_date: response.data.creation_date,
+          strong_model: response.data.strong_model,
+          weak_model: response.data.weak_model,
+          ai_provider: aiProvider,
+          system_message: systemMessage
+        });
       }
     } catch (error) {
       console.error('Failed to start chat session:', error);
@@ -130,14 +144,12 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
           {chatSessionId ? (
             <div>
               <h3>Current Session</h3>
-              <p>Session ID: {chatSessionId}</p>
-              {sessionInfo && (
-                <>
-                  <p>AI Provider: {sessionInfo.ai_provider}</p>
-                  <p>Created At: {new Date(sessionInfo.created_at).toLocaleString()}</p>
-                  <p>System Message: {sessionInfo.system_message}</p>
-                </>
-              )}
+              <p>Session ID: {sessionInfo.chatsessionsid}</p>
+              <p>AI Provider: {sessionInfo.ai_provider}</p>
+              <p>Created At: {new Date(sessionInfo.creation_date).toLocaleString()}</p>
+              <p>System Message: {sessionInfo.system_message}</p>
+              <p>Strong Model: {sessionInfo.strong_model}</p>
+              <p>Weak Model: {sessionInfo.weak_model}</p>
               <button onClick={endSession}>End Session</button>
               <button onClick={clearMemory}>Clear Memory</button>
             </div>
