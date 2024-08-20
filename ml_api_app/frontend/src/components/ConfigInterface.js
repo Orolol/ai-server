@@ -2,15 +2,30 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function ConfigInterface({ setChatSessionId, setMessages }) {
-  const [aiProvider, setAiProvider] = useState('openai');
-  const [strength, setStrength] = useState('weak');
+  const [aiProviders, setAiProviders] = useState([]);
+  const [strengths, setStrengths] = useState([]);
+  const [aiProvider, setAiProvider] = useState('');
+  const [strength, setStrength] = useState('');
   const [systemMessage, setSystemMessage] = useState('');
   const [existingSessions, setExistingSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState('');
 
   useEffect(() => {
     fetchExistingSessions();
+    fetchConfigOptions();
   }, []);
+
+  const fetchConfigOptions = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/config_options');
+      setAiProviders(response.data.ai_providers);
+      setStrengths(response.data.strengths);
+      setAiProvider(response.data.ai_providers[0]);
+      setStrength(response.data.strengths[0]);
+    } catch (error) {
+      console.error('Failed to fetch configuration options:', error);
+    }
+  };
 
   const fetchExistingSessions = async () => {
     try {
@@ -65,14 +80,18 @@ function ConfigInterface({ setChatSessionId, setMessages }) {
       <h2>Configuration</h2>
       <h3>Start New Session</h3>
       <select value={aiProvider} onChange={(e) => setAiProvider(e.target.value)}>
-        <option value="openai">OpenAI</option>
-        <option value="anthropic">Anthropic</option>
-        <option value="huggingface">HuggingFace</option>
+        {aiProviders.map((provider) => (
+          <option key={provider} value={provider}>
+            {provider}
+          </option>
+        ))}
       </select>
       <select value={strength} onChange={(e) => setStrength(e.target.value)}>
-        <option value="weak">Weak</option>
-        <option value="medium">Medium</option>
-        <option value="strong">Strong</option>
+        {strengths.map((str) => (
+          <option key={str} value={str}>
+            {str}
+          </option>
+        ))}
       </select>
       <textarea
         value={systemMessage}

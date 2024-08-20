@@ -1,5 +1,5 @@
 import os
-from flask import request, jsonify, Blueprint, send_from_directory, current_app
+from flask import request, jsonify, Blueprint, send_from_directory, current_app, g
 from flask_cors import CORS
 from app.agents.base_agent import ChatAgent, CodingAgent
 from app.agents.chat_session import ChatSession
@@ -42,7 +42,11 @@ def create_agent(agent_type, model, system_message=""):
         raise ValueError("Invalid agent type")
 
 
-@routes.route('/start_chat', methods=['POST'])
+@routes.route('/config_options', methods=['GET'])
+def config_options():
+    ai_providers = ["openai", "anthropic", "huggingface"]
+    strengths = ["weak", "medium", "strong"]
+    return jsonify({"ai_providers": ai_providers, "strengths": strengths}), 200
 def start_chat():
     print("Received request to start chat")
     data = request.get_json()
