@@ -12,7 +12,7 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
 
   useEffect(() => {
     fetchConfigOptions();
-    //fetchExistingSessions();
+    fetchExistingSessions();
   }, []); // Empty dependency array ensures this effect runs only once on mount
 
   const fetchConfigOptions = async () => {
@@ -33,18 +33,18 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
   };
 
   const fetchExistingSessions = async () => {
-    if (existingSessions.length === 0) {
-      setLoading(true);
-      setError('');
-      try {
-        const response = await axios.get('http://localhost:5000/list_sessions');
+    setLoading(true);
+    setError('');
+    try {
+      const response = await axios.get('http://localhost:5000/list_sessions');
+      if (JSON.stringify(response.data.sessions) !== JSON.stringify(existingSessions)) {
         setExistingSessions(response.data.sessions);
-      } catch (error) {
-        console.error('Failed to fetch existing sessions:', error);
-        setError('Failed to fetch existing sessions. Please try again.');
-      } finally {
-        setLoading(false);
       }
+    } catch (error) {
+      console.error('Failed to fetch existing sessions:', error);
+      setError('Failed to fetch existing sessions. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
