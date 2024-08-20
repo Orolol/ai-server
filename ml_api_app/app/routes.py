@@ -142,14 +142,20 @@ def save_session():
 
 @routes.route('/load_session/<session_id>', methods=['GET'])
 def load_session(session_id):
-    chat_session = session_storage.load_session(session_id, None, None, None)
+    ai_provider = request.args.get('ai_provider', 'openai')  # Default to 'openai' if not provided
+    chat_session = session_storage.load_session(session_id, ai_provider)
     
     if not chat_session:
         return jsonify({"error": "Session not found"}), 404
 
     chat_sessions[chat_session.session_id] = chat_session
     
-    return jsonify({"chatsessionsid": chat_session.session_id}), 200
+    return jsonify({
+        "chatsessionsid": chat_session.session_id,
+        "creation_date": getattr(chat_session, 'creation_date', 'N/A'),
+        "strong_model": getattr(chat_session, 'strong_model', 'N/A'),
+        "weak_model": getattr(chat_session, 'weak_model', 'N/A')
+    }), 200
 
 @routes.route('/list_sessions', methods=['GET'])
 def list_sessions():
