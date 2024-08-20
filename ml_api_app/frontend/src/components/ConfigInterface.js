@@ -13,34 +13,38 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
   useEffect(() => {
     fetchConfigOptions();
     fetchExistingSessions();
-  }, []); // Call both functions once on mount
+  }, []); // Empty dependency array ensures this effect runs only once on mount
 
   const fetchConfigOptions = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await axios.get('http://localhost:5000/config_options');
-      setAiProviders(response.data.ai_providers);
-      setAiProvider(response.data.ai_providers[0]);
-    } catch (error) {
-      console.error('Failed to fetch configuration options:', error);
-      setError('Failed to fetch configuration options. Please try again.');
-    } finally {
-      setLoading(false);
+    if (aiProviders.length === 0) {
+      setLoading(true);
+      setError('');
+      try {
+        const response = await axios.get('http://localhost:5000/config_options');
+        setAiProviders(response.data.ai_providers);
+        setAiProvider(response.data.ai_providers[0]);
+      } catch (error) {
+        console.error('Failed to fetch configuration options:', error);
+        setError('Failed to fetch configuration options. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   const fetchExistingSessions = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await axios.get('http://localhost:5000/list_sessions');
-      setExistingSessions(response.data.sessions);
-    } catch (error) {
-      console.error('Failed to fetch existing sessions:', error);
-      setError('Failed to fetch existing sessions. Please try again.');
-    } finally {
-      setLoading(false);
+    if (existingSessions.length === 0) {
+      setLoading(true);
+      setError('');
+      try {
+        const response = await axios.get('http://localhost:5000/list_sessions');
+        setExistingSessions(response.data.sessions);
+      } catch (error) {
+        console.error('Failed to fetch existing sessions:', error);
+        setError('Failed to fetch existing sessions. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
