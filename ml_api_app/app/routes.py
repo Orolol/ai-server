@@ -9,6 +9,7 @@ from app.models.base_model import ModelFactory
 from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
 from app.session_storage import SessionStorage
+from datetime import datetime
 
 # Store chat sessions
 chat_sessions = {}
