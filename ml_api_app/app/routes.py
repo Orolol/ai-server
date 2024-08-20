@@ -47,6 +47,7 @@ def config_options():
     ai_providers = ["openai", "anthropic", "huggingface"]
     strengths = ["weak", "medium", "strong"]
     return jsonify({"ai_providers": ai_providers, "strengths": strengths}), 200
+@routes.route('/start_chat', methods=['POST'])
 def start_chat():
     print("Received request to start chat")
     data = request.get_json()
