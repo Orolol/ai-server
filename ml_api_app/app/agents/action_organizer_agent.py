@@ -98,6 +98,7 @@ class ActionOrganizerAgent(Agent):
         action_params = action["parameters"]
 
         if action_name == "memory":
+            action_params['type'] = action_params.get('type', 'memory_retrieve')  # Default to retrieve if not specified
             return self.silent_agent.memory_action(action_params)
         elif action_name == "url_lookup":
             return self.silent_agent.url_lookup_action(action_params)
