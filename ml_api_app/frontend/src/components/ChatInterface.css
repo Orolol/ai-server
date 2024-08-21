@@ -12,6 +12,8 @@
   border-radius: 5px;
   margin-bottom: 10px;
   max-height: calc(100vh - 200px); /* Adjust this value based on your header and input container height */
+  display: flex;
+  flex-direction: column;
 }
 
 .message {
@@ -23,11 +25,15 @@
 .message.user {
   background-color: #e6f3ff;
   text-align: right;
+  align-self: flex-end;
+  max-width: 80%;
 }
 
 .message.AI {
   background-color: #f0f0f0;
   text-align: left;
+  align-self: flex-start;
+  max-width: 80%;
 }
 
 .input-container {
