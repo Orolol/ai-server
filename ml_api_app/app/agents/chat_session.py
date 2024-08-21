@@ -11,6 +11,7 @@ class ChatSession:
         self.vocal_agent = vocal_agent
         self.action_organizer_agent = action_organizer_agent
         self.web_action_history: List[Dict[str, Any]] = []
+        self.memory_action_history: List[Dict[str, Any]] = []
         if conversation_history:
             self.vocal_agent.conversation_history = conversation_history
 
@@ -38,16 +39,19 @@ class ChatSession:
         print(("#################################"))
         print("Actions result: ", actions_result)
 
-        # Format the actions_result for the vocal agent and update web action history
+        # Format the actions_result for the vocal agent and update action histories
         invisible_info = ""
         for action_name, result in actions_result.items():
             invisible_info += f"[INVISIBLE TO USER] {action_name.capitalize()} result: {result} [/INVISIBLE TO USER]\n"
+            action_entry = {
+                "type": action_name,
+                "details": result,
+                "timestamp": datetime.datetime.now().isoformat()
+            }
             if action_name in ["Web_search", "url_lookup"]:
-                self.web_action_history.append({
-                    "type": action_name,
-                    "details": result,
-                    "timestamp": datetime.datetime.now().isoformat()
-                })
+                self.web_action_history.append(action_entry)
+            elif action_name in ["memory_store", "memory_retrieve"]:
+                self.memory_action_history.append(action_entry)
 
         # Enrich the data with the preprompt, user's prompt, and invisible actions result
         enriched_data = {
@@ -69,6 +73,9 @@ class ChatSession:
 
     def get_web_action_history(self) -> List[Dict[str, Any]]:
         return self.web_action_history
+
+    def get_memory_action_history(self) -> List[Dict[str, Any]]:
+        return self.memory_action_history
 
     def get_messages(self) -> List[Dict[str, Any]]:
         """
