@@ -44,7 +44,7 @@ function ChatInterface() {
           <div key={index} className={`message ${message.role}`}>
             <strong>{message.role}:</strong>
             <ReactMarkdown>
-              {message.content.replace(/\[INVISIBLE TO USER\][\s\S]*?\[\/INVISIBLE TO USER\]/g, '')}
+              {message.content.replace(/\[INVISIBLE TO USER\][\s\S]*?\[\/INVISIBLE\]/g, '')}
             </ReactMarkdown>
           </div>
         ))}
