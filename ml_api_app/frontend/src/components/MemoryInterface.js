@@ -11,7 +11,8 @@ function MemoryInterface() {
   const fetchMemoryActions = async () => {
     try {
       const response = await axios.get('http://localhost:5000/get_memory_action_history');
-      setMemoryActions(response.data.history);
+      console.log('Memory actions response:', response.data);
+      setMemoryActions(response.data.history || []);
     } catch (error) {
       console.error('Failed to fetch memory actions:', error);
     }

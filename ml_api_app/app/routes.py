@@ -297,6 +297,17 @@ def search_memories():
 def get_memory_action_history():
     try:
         history = long_term_memory.get_memory_log()
-        return jsonify({"history": history}), 200
+        # Convert the history to a list of dictionaries
+        formatted_history = [
+            {
+                "agent_type": entry.agent_type,
+                "date": entry.date.isoformat(),
+                "keywords": entry.keywords,
+                "interaction_summary": entry.interaction_summary
+            }
+            for entry in history
+        ]
+        return jsonify({"history": formatted_history}), 200
     except Exception as e:
+        print(f"Error in get_memory_action_history: {str(e)}")
         return jsonify({"error": f"Failed to get memory action history: {str(e)}"}), 500
