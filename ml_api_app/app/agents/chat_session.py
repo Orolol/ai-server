@@ -19,7 +19,8 @@ class ChatSession:
         return {
             'session_id': self.session_id,
             'conversation_history': self.vocal_agent.conversation_history,
-            'web_action_history': self.web_action_history
+            'web_action_history': self.web_action_history,
+            'memory_action_history': self.memory_action_history
         }
 
     @classmethod
@@ -30,6 +31,7 @@ class ChatSession:
                       session_id=data['session_id'], 
                       conversation_history=data['conversation_history'])
         session.web_action_history = data['web_action_history']
+        session.memory_action_history = data.get('memory_action_history', [])
         return session
 
     def process_input(self, data):
