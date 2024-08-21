@@ -50,7 +50,7 @@ class ChatSession:
 
         # Enrich the data with the preprompt, user's prompt, and invisible actions result
         enriched_data = {
-            "prompt": f"{self.vocal_agent.preprompt}\n\n[INVISIBLE TO USER] The following information is not visible to the user and should be used to inform your response without directly referencing it:\n{invisible_info}[/INVISIBLE]\n\nUser's message: {data['prompt']}\n\nPlease respond to the user based on the above information:",
+            "prompt": f"{self.vocal_agent.preprompt}\n\n[INVISIBLE TO USER] The following information is not visible to the user and should be used to inform your response without directly referencing it:\n{invisible_info}\n\nUser's message: [/INVISIBLE]{data['prompt']}\n\nPlease respond to the user based on the above information:",
             "conversation_history": self.vocal_agent.conversation_history
         }
 
