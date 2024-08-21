@@ -33,6 +33,7 @@ function App() {
           <ConfigInterface
             setChatSessionId={setChatSessionId}
             setMessages={setMessages}
+            chatSessionId={chatSessionId}
           />
         );
       case 'memory':

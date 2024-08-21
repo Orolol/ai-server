@@ -21,9 +21,7 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
   useEffect(() => {
     fetchConfigOptions();
     fetchExistingSessions();
-    if (chatSessionId) {
-      fetchSessionInfo();
-    }
+
   }, [chatSessionId]);
 
   const fetchConfigOptions = async () => {
@@ -59,15 +57,6 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
     }
   };
 
-  const fetchSessionInfo = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/session_info/${chatSessionId}`);
-      setSessionInfo(response.data);
-    } catch (error) {
-      console.error('Failed to fetch session info:', error);
-    }
-  };
-
   const startChatSession = async () => {
     try {
       const response = await axios.post('http://localhost:5000/start_chat', {
@@ -99,7 +88,6 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
       const response = await axios.get(`http://localhost:5000/load_session/${selectedSession}`);
       if (response.data.chatsessionsid) {
         setChatSessionId(response.data.chatsessionsid);
-        fetchSessionInfo();
         // Fetch messages for this session
         const messagesResponse = await axios.get(`http://localhost:5000/get_messages/${response.data.chatsessionsid}`);
         setMessages(messagesResponse.data.messages);
