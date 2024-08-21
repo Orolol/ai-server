@@ -2,6 +2,7 @@ import uuid
 from typing import List, Dict, Any
 import json
 import datetime
+import re
 
 class ChatSession:
     def __init__(self, silent_agent, vocal_agent, action_organizer_agent, session_id=None, conversation_history=None):
@@ -40,7 +41,7 @@ class ChatSession:
         # Format the actions_result for the vocal agent and update web action history
         invisible_info = ""
         for action_name, result in actions_result.items():
-            invisible_info += f"[INVISIBLE TO USER] {action_name.capitalize()} result: {result} [/INVISIBLE]\n"
+            invisible_info += f"[INVISIBLE TO USER] {action_name.capitalize()} result: {result} [/INVISIBLE TO USER]\n"
             if action_name in ["Web_search", "url_lookup"]:
                 self.web_action_history.append({
                     "type": action_name,
@@ -50,7 +51,7 @@ class ChatSession:
 
         # Enrich the data with the preprompt, user's prompt, and invisible actions result
         enriched_data = {
-            "prompt": f"{self.vocal_agent.preprompt}\n\n[INVISIBLE TO USER] The following information is not visible to the user and should be used to inform your response without directly referencing it:\n{invisible_info}\n\nUser's message: [/INVISIBLE]{data['prompt']}\n\nPlease respond to the user based on the above information:",
+            "prompt": f"{self.vocal_agent.preprompt}\n\n[INVISIBLE TO USER] The following information is not visible to the user and should be used to inform your response without directly referencing it:\n{invisible_info}\n\nUser's message: [/INVISIBLE TO USER]{data['prompt']}\n\nPlease respond to the user based on the above information:",
             "conversation_history": self.vocal_agent.conversation_history
         }
 
@@ -58,7 +59,13 @@ class ChatSession:
 
         # Send the enriched data to the VocalAgent
         response = self.vocal_agent.act(enriched_data)
-        return response
+
+        # Remove hidden parts from the response
+        visible_response = self.remove_hidden_parts(response)
+        return visible_response
+
+    def remove_hidden_parts(self, text):
+        return re.sub(r'\[INVISIBLE TO USER\].*?\[/INVISIBLE TO USER\]', '', text, flags=re.DOTALL)
 
     def get_web_action_history(self) -> List[Dict[str, Any]]:
         return self.web_action_history
