@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import useChatSessionStore from '../store/chatSessionStore';
 import './ChatInterface.css';
 
-function ChatInterface({ chatSessionId, messages, setMessages }) {
+function ChatInterface() {
   const [userInput, setUserInput] = useState('');
+  const { chatSessionId, messages, setMessages } = useChatSessionStore();
 
   const sendMessage = async () => {
     if (!userInput.trim() || !chatSessionId) return;

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import useChatSessionStore from '../store/chatSessionStore';
 
-function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
+function ConfigInterface() {
   const [aiProviders, setAiProviders] = useState([]);
   const [aiProvider, setAiProvider] = useState('');
   const [systemMessage, setSystemMessage] = useState('');
@@ -9,19 +10,19 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
   const [selectedSession, setSelectedSession] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [sessionInfo, setSessionInfo] = useState({
-    chatsessionsid: null,
-    creation_date: null,
-    strong_model: null,
-    weak_model: null,
-    ai_provider: null,
-    system_message: null
-  });
+
+  const {
+    chatSessionId,
+    sessionInfo,
+    startChatSession,
+    reconnectToSession,
+    clearMemory,
+    endSession
+  } = useChatSessionStore();
 
   useEffect(() => {
     fetchConfigOptions();
     fetchExistingSessions();
-
   }, [chatSessionId]);
 
   const fetchConfigOptions = async () => {
@@ -57,69 +58,13 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
     }
   };
 
-  const startChatSession = async () => {
-    try {
-      const response = await axios.post('http://localhost:5000/start_chat', {
-        ai_provider: aiProvider,
-        system_message: systemMessage
-      });
-
-      if (response.data.chatsessionsid) {
-        setChatSessionId(response.data.chatsessionsid);
-        setMessages([]);
-        setSessionInfo({
-          chatsessionsid: response.data.chatsessionsid,
-          creation_date: response.data.creation_date,
-          strong_model: response.data.strong_model,
-          weak_model: response.data.weak_model,
-          ai_provider: aiProvider,
-          system_message: systemMessage
-        });
-      }
-    } catch (error) {
-      console.error('Failed to start chat session:', error);
-      setError('Failed to start chat session. Please try again.');
-    }
+  const handleStartChatSession = () => {
+    startChatSession(aiProvider, systemMessage);
   };
 
-  const reconnectToSession = async () => {
+  const handleReconnectToSession = () => {
     if (!selectedSession) return;
-    try {
-      const response = await axios.get(`http://localhost:5000/load_session/${selectedSession}`);
-      if (response.data.chatsessionsid) {
-        setChatSessionId(response.data.chatsessionsid);
-        // Fetch messages for this session
-        const messagesResponse = await axios.get(`http://localhost:5000/get_messages/${response.data.chatsessionsid}`);
-        setMessages(messagesResponse.data.messages);
-      }
-    } catch (error) {
-      console.error('Failed to reconnect to session:', error);
-      setError('Failed to reconnect to session. Please try again.');
-    }
-  };
-
-  const clearMemory = async () => {
-    try {
-      await axios.post('http://localhost:5000/clear_memory');
-      setMessages([]);
-      setChatSessionId(null);
-      setSessionInfo(null);
-    } catch (error) {
-      console.error('Failed to clear memory:', error);
-      setError('Failed to clear memory. Please try again.');
-    }
-  };
-
-  const endSession = async () => {
-    try {
-      await axios.post(`http://localhost:5000/end_session/${chatSessionId}`);
-      setChatSessionId(null);
-      setMessages([]);
-      setSessionInfo(null);
-    } catch (error) {
-      console.error('Failed to end session:', error);
-      setError('Failed to end session. Please try again.');
-    }
+    reconnectToSession(selectedSession);
   };
 
   return (
@@ -156,7 +101,7 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
                 onChange={(e) => setSystemMessage(e.target.value)}
                 placeholder="System Message"
               />
-              <button onClick={startChatSession}>Start New Chat Session</button>
+              <button onClick={handleStartChatSession}>Start New Chat Session</button>
             </div>
           )}
           
@@ -171,7 +116,7 @@ function ConfigInterface({ chatSessionId, setChatSessionId, setMessages }) {
                   </option>
                 ))}
               </select>
-              <button onClick={reconnectToSession}>Reconnect to Session</button>
+              <button onClick={handleReconnectToSession}>Reconnect to Session</button>
             </>
           )}
         </>
