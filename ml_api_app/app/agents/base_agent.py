@@ -4,6 +4,7 @@ from app.utils.logger import ai_logger
 from jinja2 import Environment, FileSystemLoader
 import datetime
 import os
+import re
 
 
 class Agent(ABC):
@@ -63,7 +64,6 @@ class CodingAgent(Agent):
 
 class ChatAgent(Agent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
-        # print the current path
         print("current path: ", os.getcwd())
         env = Environment(loader=FileSystemLoader('app/templates'))
         template = env.get_template('preprompt_template.jinja')
@@ -75,15 +75,35 @@ class ChatAgent(Agent):
         self.system_message = system_message
 
     def act(self, data):
-        # Implement the logic for chat agent
+        # Remove hidden parts from the user's prompt
+        visible_prompt = self.remove_hidden_parts(data["prompt"])
+        
+        # Append only the visible part to the conversation history
         self.conversation_history.append(
-            {"role": "user", "content": data["prompt"]})
+            {"role": "user", "content": visible_prompt})
+        
+        # Prepare data for the model
         data["conversation_history"] = self.conversation_history
+        data["prompt"] = visible_prompt  # Use the visible prompt for prediction
+        
+        # Get prediction from the model
         prediction = self.model.predict(data)
+        
+        # Process the prediction to ensure no hidden parts are included
+        visible_prediction = self.remove_hidden_parts(prediction)
+        
+        # Append the visible prediction to the conversation history
         self.conversation_history.append(
-            {"role": "assistant", "content": prediction})
+            {"role": "assistant", "content": visible_prediction})
+        
+        # Store the interaction in memory
         self.memory.store_interaction(
-            "chat", prediction, data.get("keywords", []))
-        return prediction
+            "chat", visible_prediction, data.get("keywords", []))
+        
+        return visible_prediction
+
+    def remove_hidden_parts(self, text):
+        # Remove parts enclosed in [INVISIBLE TO USER] tags
+        return re.sub(r'\[INVISIBLE TO USER\].*?\[/INVISIBLE\]', '', text, flags=re.DOTALL)
 
 
