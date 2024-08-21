@@ -10,6 +10,10 @@ from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
 from app.session_storage import SessionStorage
 from datetime import datetime
+from flask import g
+
+# Create a single instance of LongTermMemory
+long_term_memory = LongTermMemory()
 
 # Store chat sessions
 chat_sessions = {}
@@ -192,8 +196,7 @@ def get_messages(chatsessionsid):
 @routes.route('/clear_memory', methods=['POST'])
 def clear_memory():
     try:
-        memory = LongTermMemory()
-        memory.clear_memory()
+        long_term_memory.clear_memory()
         return jsonify({"message": "Memory cleared successfully"}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to clear memory: {str(e)}"}), 500
@@ -244,8 +247,7 @@ def add_memory():
     if not memory_content:
         return jsonify({"error": "Memory content is required"}), 400
     try:
-        memory = LongTermMemory()
-        memory_id = memory.add_memory(memory_content)
+        memory_id = long_term_memory.add_memory(memory_content)
         return jsonify({"memory_id": memory_id}), 201
     except Exception as e:
         return jsonify({"error": f"Failed to add memory: {str(e)}"}), 500
@@ -253,8 +255,7 @@ def add_memory():
 @routes.route('/get_memory/<memory_id>', methods=['GET'])
 def get_memory(memory_id):
     try:
-        memory = LongTermMemory()
-        memory_content = memory.get_memory(memory_id)
+        memory_content = long_term_memory.get_memory(memory_id)
         return jsonify({"content": memory_content}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to get memory: {str(e)}"}), 404
@@ -266,8 +267,7 @@ def update_memory(memory_id):
     if not new_content:
         return jsonify({"error": "New memory content is required"}), 400
     try:
-        memory = LongTermMemory()
-        memory.update_memory(memory_id, new_content)
+        long_term_memory.update_memory(memory_id, new_content)
         return jsonify({"message": "Memory updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to update memory: {str(e)}"}), 400
@@ -275,8 +275,7 @@ def update_memory(memory_id):
 @routes.route('/delete_memory/<memory_id>', methods=['DELETE'])
 def delete_memory(memory_id):
     try:
-        memory = LongTermMemory()
-        memory.delete_memory(memory_id)
+        long_term_memory.delete_memory(memory_id)
         return jsonify({"message": "Memory deleted successfully"}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to delete memory: {str(e)}"}), 400
@@ -287,8 +286,7 @@ def search_memories():
     if not query:
         return jsonify({"error": "Search query is required"}), 400
     try:
-        memory = LongTermMemory()
-        results = memory.search_memories(query)
+        results = long_term_memory.search_memories(query)
         return jsonify({"results": results}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to search memories: {str(e)}"}), 500
@@ -296,8 +294,7 @@ def search_memories():
 @routes.route('/get_memory_action_history', methods=['GET'])
 def get_memory_action_history():
     try:
-        memory = LongTermMemory()
-        history = memory.get_memory_log()
+        history = long_term_memory.get_memory_log()
         return jsonify({"history": history}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to get memory action history: {str(e)}"}), 500
