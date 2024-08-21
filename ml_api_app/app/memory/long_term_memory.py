@@ -83,8 +83,9 @@ class LongTermMemory:
                 query_texts=keywords,
                 n_results=10
             )
-            logger.info(f"Retrieved interactions for keywords {keywords}")
-            return results
+            interactions = results['documents'][0] if results['documents'] else []
+            logger.info(f"Retrieved {len(interactions)} interactions for keywords {keywords}")
+            return interactions
         except Exception as e:
             logger.error(
                 f"Failed to retrieve interactions - {str(e)}", exc_info=True)
