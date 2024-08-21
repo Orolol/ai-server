@@ -5,27 +5,34 @@ import './ChatInterface.css';
 
 function ChatInterface() {
   const [userInput, setUserInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { chatSessionId, messages, setMessages } = useChatSessionStore();
 
   const sendMessage = async () => {
-    if (!userInput.trim() || !chatSessionId) return;
+    if (!userInput.trim() || !chatSessionId || isLoading) return;
+
+    setIsLoading(true);
+    const currentInput = userInput;
+    setUserInput('');
 
     try {
       const response = await axios.post('http://localhost:5000/send_message', {
         chatsessionsid: chatSessionId,
-        message: userInput
+        message: currentInput
       });
 
       if (response.data.response) {
         setMessages([
           ...messages,
-          { role: 'user', content: userInput },
+          { role: 'user', content: currentInput },
           { role: 'AI', content: response.data.response }
         ]);
-        setUserInput('');
       }
     } catch (error) {
       console.error('Failed to send message:', error);
+      // Optionally, you can add error handling UI here
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -45,8 +52,11 @@ function ChatInterface() {
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="Type your message..."
           onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+          disabled={isLoading}
         />
-        <button onClick={sendMessage}>Send</button>
+        <button onClick={sendMessage} disabled={isLoading}>
+          {isLoading ? <span className="spinner"></span> : 'Send'}
+        </button>
       </div>
     </div>
   );
