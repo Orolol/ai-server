@@ -6,13 +6,6 @@ from transformers import pipeline
 from openai import OpenAI
 from config.config import Config
 
-# Try to import Llama, set flag if not available
-try:
-    from llama_cpp import Llama
-    LLAMA_AVAILABLE = True
-except ImportError:
-    LLAMA_AVAILABLE = False
-
 
 class Model(ABC):
     @abstractmethod
@@ -70,19 +63,6 @@ class HuggingFaceModel(Model):
         return response[0]['generated_text']
 
 
-class LlamaModel(Model):
-    def __init__(self, model_path: str, **kwargs):
-        if not LLAMA_AVAILABLE:
-            raise ImportError("llama_cpp is not installed. Please install it to use LlamaModel.")
-        self.model = Llama(model_path=model_path, **kwargs)
-
-    def predict(self, data: Dict[str, Any]) -> str:
-        prompt = "\n".join(
-            [f"{m['role']}: {m['content']}" for m in data["conversation_history"]])
-        response = self.model(prompt, max_tokens=100)
-        return response['choices'][0]['text'].strip()
-
-
 class ModelFactory:
     @staticmethod
     def create_model(provider: str, strength: str) -> Model:
@@ -104,12 +84,5 @@ class ModelFactory:
             return AnthropicModel(model_name, **model_params)
         elif provider == "huggingface":
             return HuggingFaceModel(model_name, **model_params)
-        elif provider == "llama":
-            if not LLAMA_AVAILABLE:
-                raise ImportError("llama_cpp is not installed. Please install it to use Llama models.")
-            model_path = config.get("model_path")
-            if not model_path:
-                raise ValueError("Model path not specified for Llama model")
-            return LlamaModel(model_path, **model_params)
         else:
             raise ValueError(f"Unsupported provider: {provider}")
