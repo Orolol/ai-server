@@ -153,4 +153,4 @@ class LongTermMemory:
             raise
 
     def get_memory_log(self) -> List[Dict[str, Any]]:
-        return self.memory_log
+        return sorted(self.memory_log, key=lambda x: x['date'], reverse=True)

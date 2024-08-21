@@ -4,9 +4,11 @@ import axios from 'axios';
 function MemoryInterface() {
   const [memories, setMemories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [memoryActions, setMemoryActions] = useState([]);
 
   useEffect(() => {
     fetchMemories();
+    fetchMemoryActions();
   }, []);
 
   const fetchMemories = async () => {
@@ -17,6 +19,15 @@ function MemoryInterface() {
       setMemories(response.data.results);
     } catch (error) {
       console.error('Failed to fetch memories:', error);
+    }
+  };
+
+  const fetchMemoryActions = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/get_memory_action_history');
+      setMemoryActions(response.data.history);
+    } catch (error) {
+      console.error('Failed to fetch memory actions:', error);
     }
   };
 
@@ -40,6 +51,18 @@ function MemoryInterface() {
       <ul>
         {memories.map((memory, index) => (
           <li key={index}>{memory.document}</li>
+        ))}
+      </ul>
+      <h3>Memory Actions</h3>
+      <ul>
+        {memoryActions.map((action, index) => (
+          <li key={index}>
+            <strong>{action.agent_type}</strong> - {action.date}
+            <br />
+            Keywords: {action.keywords.join(', ')}
+            <br />
+            Summary: {action.interaction_summary}
+          </li>
         ))}
       </ul>
     </div>

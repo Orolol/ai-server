@@ -297,7 +297,7 @@ def search_memories():
 def get_memory_action_history():
     try:
         memory = LongTermMemory()
-        history = memory.get_action_history()
+        history = memory.get_memory_log()
         return jsonify({"history": history}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to get memory action history: {str(e)}"}), 500
