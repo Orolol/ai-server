@@ -26,6 +26,25 @@ const useChatSessionStore = create((set, get) => ({
       }
     }
   },
+  fetchSessionInfo: async (sessionId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/load_session/${sessionId}`);
+      if (response.data.chatsessionsid) {
+        set({
+          sessionInfo: {
+            chatsessionsid: response.data.chatsessionsid,
+            creation_date: response.data.creation_date,
+            strong_model: response.data.strong_model,
+            weak_model: response.data.weak_model,
+            ai_provider: response.data.ai_provider,
+            system_message: response.data.system_message
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch session info:', error);
+    }
+  },
   startChatSession: async (aiProvider, systemMessage) => {
     try {
       const response = await axios.post('http://localhost:5000/start_chat', {
@@ -55,7 +74,17 @@ const useChatSessionStore = create((set, get) => ({
     try {
       const response = await axios.get(`http://localhost:5000/load_session/${sessionId}`);
       if (response.data.chatsessionsid) {
-        set({ chatSessionId: response.data.chatsessionsid });
+        set({ 
+          chatSessionId: response.data.chatsessionsid,
+          sessionInfo: {
+            chatsessionsid: response.data.chatsessionsid,
+            creation_date: response.data.creation_date,
+            strong_model: response.data.strong_model,
+            weak_model: response.data.weak_model,
+            ai_provider: response.data.ai_provider,
+            system_message: response.data.system_message
+          }
+        });
         get().fetchMessages();
       }
     } catch (error) {

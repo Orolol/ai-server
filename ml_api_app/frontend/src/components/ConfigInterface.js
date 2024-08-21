@@ -17,13 +17,18 @@ function ConfigInterface() {
     startChatSession,
     reconnectToSession,
     clearMemory,
-    endSession
+    endSession,
+    fetchSessionInfo
   } = useChatSessionStore();
 
   useEffect(() => {
     fetchConfigOptions();
-    fetchExistingSessions();
-  }, [chatSessionId]);
+    if (chatSessionId) {
+      fetchSessionInfo(chatSessionId);
+    } else {
+      fetchExistingSessions();
+    }
+  }, [chatSessionId, fetchSessionInfo]);
 
   const fetchConfigOptions = async () => {
     if (aiProviders.length === 0) {
@@ -47,9 +52,7 @@ function ConfigInterface() {
     setError('');
     try {
       const response = await axios.get('http://localhost:5000/list_sessions');
-      if (JSON.stringify(response.data.sessions) !== JSON.stringify(existingSessions)) {
-        setExistingSessions(response.data.sessions);
-      }
+      setExistingSessions(response.data.sessions);
     } catch (error) {
       console.error('Failed to fetch existing sessions:', error);
       setError('Failed to fetch existing sessions. Please try again.');
@@ -79,7 +82,7 @@ function ConfigInterface() {
               <h3>Current Session</h3>
               <p>Session ID: {sessionInfo.chatsessionsid}</p>
               <p>AI Provider: {sessionInfo.ai_provider}</p>
-              <p>Created At: {new Date(sessionInfo.creation_date).toLocaleString()}</p>
+              <p>Created At: {sessionInfo.creation_date ? new Date(sessionInfo.creation_date).toLocaleString() : 'N/A'}</p>
               <p>System Message: {sessionInfo.system_message}</p>
               <p>Strong Model: {sessionInfo.strong_model}</p>
               <p>Weak Model: {sessionInfo.weak_model}</p>
