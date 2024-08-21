@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
 import useChatSessionStore from '../store/chatSessionStore';
 import './ChatInterface.css';
 
@@ -41,7 +42,10 @@ function ChatInterface() {
       <div className="message-container">
         {messages.map((message, index) => (
           <div key={index} className={`message ${message.role}`}>
-            <strong>{message.role}:</strong> {message.content}
+            <strong>{message.role}:</strong>
+            <ReactMarkdown>
+              {message.content.replace(/\[INVISIBLE TO USER\][\s\S]*?\[\/INVISIBLE TO USER\]/g, '')}
+            </ReactMarkdown>
           </div>
         ))}
       </div>
