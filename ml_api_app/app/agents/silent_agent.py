@@ -34,6 +34,8 @@ class SilentAgent(ModelAgent):
 
     def memory_action(self, data: Dict[str, Any]) -> Any:
         action_type = data.get('type')
+        if not action_type:
+            raise ValueError("Memory action type is missing or None")
         if action_type == 'memory_store':
             return self.memory.store_interaction(data.get('key'), data.get('value'), data.get('tags', []))
         elif action_type == 'memory_retrieve':
