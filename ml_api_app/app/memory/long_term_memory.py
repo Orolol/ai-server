@@ -17,6 +17,7 @@ class LongTermMemory:
         
         self.client = None
         self.collection = None
+        self.memory_log = []
         self._connect_and_initialize()
 
     def _connect_and_initialize(self):
@@ -62,6 +63,13 @@ class LongTermMemory:
                             "keywords": ", ".join(keywords), "date": date}],
                 ids=[f"{agent_type}_{date}"]
             )
+            log_entry = {
+                "agent_type": agent_type,
+                "keywords": keywords,
+                "date": date,
+                "interaction_summary": interaction[:100] + "..." if len(interaction) > 100 else interaction
+            }
+            self.memory_log.append(log_entry)
             logger.info(
                 f"Stored interaction for agent type {agent_type} with keywords {keywords}")
         except Exception as e:
@@ -143,3 +151,6 @@ class LongTermMemory:
         except Exception as e:
             logger.error(f"Failed to retrieve search results - {str(e)}", exc_info=True)
             raise
+
+    def get_memory_log(self) -> List[Dict[str, Any]]:
+        return self.memory_log
