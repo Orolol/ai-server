@@ -106,7 +106,9 @@ def start_chat():
         "chatsessionsid": chat_session.session_id,
         "creation_date": chat_session.creation_date,
         "strong_model": chat_session.strong_model,
-        "weak_model": chat_session.weak_model
+        "weak_model": chat_session.weak_model,
+        "ai_provider": ai_provider,
+        "conversation_history_length": len(chat_session.conversation_history)
     })
 
 
@@ -160,7 +162,9 @@ def load_session(session_id):
         "chatsessionsid": chat_session.session_id,
         "creation_date": getattr(chat_session, 'creation_date', datetime.now().isoformat()),
         "strong_model": getattr(chat_session, 'strong_model', 'N/A'),
-        "weak_model": getattr(chat_session, 'weak_model', 'N/A')
+        "weak_model": getattr(chat_session, 'weak_model', 'N/A'),
+        "ai_provider": ai_provider,
+        "conversation_history_length": len(chat_session.conversation_history) if hasattr(chat_session, 'conversation_history') else 0
     }), 200
 
 @routes.route('/list_sessions', methods=['GET'])
