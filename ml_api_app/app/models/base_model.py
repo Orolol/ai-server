@@ -4,8 +4,14 @@ from typing import Dict, Any, List
 from anthropic import Anthropic
 from transformers import pipeline
 from openai import OpenAI
-from llama_cpp import Llama
 from config.config import Config
+
+# Try to import Llama, set flag if not available
+try:
+    from llama_cpp import Llama
+    LLAMA_AVAILABLE = True
+except ImportError:
+    LLAMA_AVAILABLE = False
 
 
 class Model(ABC):
@@ -66,6 +72,8 @@ class HuggingFaceModel(Model):
 
 class LlamaModel(Model):
     def __init__(self, model_path: str, **kwargs):
+        if not LLAMA_AVAILABLE:
+            raise ImportError("llama_cpp is not installed. Please install it to use LlamaModel.")
         self.model = Llama(model_path=model_path, **kwargs)
 
     def predict(self, data: Dict[str, Any]) -> str:
@@ -97,6 +105,8 @@ class ModelFactory:
         elif provider == "huggingface":
             return HuggingFaceModel(model_name, **model_params)
         elif provider == "llama":
+            if not LLAMA_AVAILABLE:
+                raise ImportError("llama_cpp is not installed. Please install it to use Llama models.")
             model_path = config.get("model_path")
             if not model_path:
                 raise ValueError("Model path not specified for Llama model")
