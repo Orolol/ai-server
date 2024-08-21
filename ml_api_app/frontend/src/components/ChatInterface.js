@@ -41,7 +41,7 @@ function ChatInterface() {
     <div className="chat-interface">
       <div className="message-container">
         {messages.map((message, index) => (
-          <div key={index} className={`message ${message.role}`}>
+          <div key={index} className={`message ${message.role}`} style={{textAlign: message.role === 'user' ? 'right' : 'left'}}>
             <strong>{message.role}:</strong>
             <ReactMarkdown>
               {message.content.replace(/\[INVISIBLE TO USER\][\s\S]*?\[\/INVISIBLE\]/g, '')}
