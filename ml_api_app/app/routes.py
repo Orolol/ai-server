@@ -88,8 +88,6 @@ def start_chat():
             print("Action organizer agent created")
             chat_session = ChatSession(silent_agent, vocal_agent, action_organizer_agent)
             chat_session.creation_date = datetime.now().isoformat()
-            chat_session.strong_model = strong_model.model_name
-            chat_session.weak_model = weak_model.model_name
             print(f"Chat session created with ID: {chat_session.session_id} and creation date: {chat_session.creation_date}")
 
         chat_sessions[chat_session.session_id] = chat_session
@@ -105,8 +103,8 @@ def start_chat():
     return jsonify({
         "chatsessionsid": chat_session.session_id,
         "creation_date": chat_session.creation_date,
-        "strong_model": chat_session.strong_model,
-        "weak_model": chat_session.weak_model,
+        "strong_model": chat_session.vocal_agent.model.model_name,
+        "weak_model": chat_session.silent_agent.model.model_name,
         "ai_provider": ai_provider,
         "conversation_history_length": len(chat_session.conversation_history)
     })
@@ -161,8 +159,8 @@ def load_session(session_id):
     return jsonify({
         "chatsessionsid": chat_session.session_id,
         "creation_date": getattr(chat_session, 'creation_date', datetime.now().isoformat()),
-        "strong_model": getattr(chat_session, 'strong_model', 'N/A'),
-        "weak_model": getattr(chat_session, 'weak_model', 'N/A'),
+        "strong_model": chat_session.vocal_agent.model.model_name if hasattr(chat_session, 'vocal_agent') else 'N/A',
+        "weak_model": chat_session.silent_agent.model.model_name if hasattr(chat_session, 'silent_agent') else 'N/A',
         "ai_provider": ai_provider,
         "conversation_history_length": len(chat_session.conversation_history) if hasattr(chat_session, 'conversation_history') else 0
     }), 200
@@ -178,8 +176,8 @@ def list_sessions():
             session_details.append({
                 "id": chat_session.session_id,
                 "creation_date": getattr(chat_session, 'creation_date', 'N/A'),
-                "strong_model": getattr(chat_session, 'strong_model', 'N/A'),
-                "weak_model": getattr(chat_session, 'weak_model', 'N/A')
+                "strong_model": chat_session.vocal_agent.model.model_name if hasattr(chat_session, 'vocal_agent') else 'N/A',
+                "weak_model": chat_session.silent_agent.model.model_name if hasattr(chat_session, 'silent_agent') else 'N/A'
             })
     return jsonify({"sessions": session_details}), 200
 
