@@ -90,7 +90,7 @@ def start_chat():
             chat_session.creation_date = datetime.now().isoformat()
             chat_session.strong_model = strong_model.model_name
             chat_session.weak_model = weak_model.model_name
-            print(f"Chat session created with ID: {chat_session.session_id}")
+            print(f"Chat session created with ID: {chat_session.session_id} and creation date: {chat_session.creation_date}")
 
         chat_sessions[chat_session.session_id] = chat_session
         # Save the session
@@ -158,7 +158,7 @@ def load_session(session_id):
     
     return jsonify({
         "chatsessionsid": chat_session.session_id,
-        "creation_date": getattr(chat_session, 'creation_date', 'N/A'),
+        "creation_date": getattr(chat_session, 'creation_date', datetime.now().isoformat()),
         "strong_model": getattr(chat_session, 'strong_model', 'N/A'),
         "weak_model": getattr(chat_session, 'weak_model', 'N/A')
     }), 200
