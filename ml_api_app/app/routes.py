@@ -292,3 +292,12 @@ def search_memories():
         return jsonify({"results": results}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to search memories: {str(e)}"}), 500
+
+@routes.route('/get_memory_action_history', methods=['GET'])
+def get_memory_action_history():
+    try:
+        memory = LongTermMemory()
+        history = memory.get_action_history()
+        return jsonify({"history": history}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to get memory action history: {str(e)}"}), 500
