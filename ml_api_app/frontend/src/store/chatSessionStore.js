@@ -20,7 +20,11 @@ const useChatSessionStore = create((set, get) => ({
     if (chatSessionId) {
       try {
         const response = await axios.get(`http://localhost:5000/get_messages/${chatSessionId}`);
-        set({ messages: response.data.messages });
+        const processedMessages = response.data.messages.map(message => ({
+          ...message,
+          content: message.content.replace(/\[INVISIBLE TO USER\][\s\S]*?\[\/INVISIBLE\]/g, '')
+        }));
+        set({ messages: processedMessages });
       } catch (error) {
         console.error('Failed to fetch messages:', error);
       }

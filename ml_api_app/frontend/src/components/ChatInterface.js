@@ -44,7 +44,12 @@ function ChatInterface() {
           <div key={index} className={`message ${message.role}`} style={{textAlign: message.role === 'user' ? 'right' : 'left'}}>
             <strong>{message.role}:</strong>
             <ReactMarkdown>
-              {message.content.replace(/\[INVISIBLE TO USER\][\s\S]*?\[\/INVISIBLE\]/g, '')}
+              {message.content.split(/(\[INVISIBLE TO USER\][\s\S]*?\[\/INVISIBLE\])/).map((part, index) => {
+                if (part.startsWith('[INVISIBLE TO USER]') && part.endsWith('[/INVISIBLE]')) {
+                  return null; // Don't render invisible parts
+                }
+                return part;
+              }).join('')}
             </ReactMarkdown>
           </div>
         ))}
