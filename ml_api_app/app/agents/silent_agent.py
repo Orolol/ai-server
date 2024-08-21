@@ -32,6 +32,15 @@ class SilentAgent(ModelAgent):
         else:
             raise ValueError(f"Unknown action: {action}")
 
+    def memory_action(self, data: Dict[str, Any]) -> Any:
+        action_type = data.get('type')
+        if action_type == 'memory_store':
+            return self.memory.store_interaction(data.get('key'), data.get('value'), data.get('tags', []))
+        elif action_type == 'memory_retrieve':
+            return self.memory.retrieve(data.get('key'))
+        else:
+            raise ValueError(f"Unknown memory action type: {action_type}")
+
     def web_search_action(self, data: Dict[str, Any]) -> str:
         ai_logger.info(f"Web search action initiated with data: {data}")
         query = data.get("query")
