@@ -16,10 +16,10 @@ from flask import g
 # Create a single instance of LongTermMemory
 long_term_memory = LongTermMemory()
 
-# Store chat sessions
-session_ids = []
+# Store chat sessions in memory
 current_session = None
 session_storage = SessionStorage()
+session_ids = session_storage.list_sessions()
 
 routes = Blueprint('routes', __name__)
 
@@ -181,16 +181,11 @@ def load_session(session_id):
 
 @routes.route('/list_sessions', methods=['GET'])
 def list_sessions():
+    print("Listing sessions", session_ids)
     session_details = []
     for session_id in session_ids:
-        ai_provider = "openai"  # Default provider
-        chat_session = session_storage.load_session(session_id, ai_provider)
-        if chat_session:
             session_details.append({
-                "id": chat_session.session_id,
-                "creation_date": getattr(chat_session, 'creation_date', 'N/A'),
-                "strong_model": chat_session.vocal_agent.model.model_name if hasattr(chat_session, 'vocal_agent') else 'N/A',
-                "weak_model": chat_session.silent_agent.model.model_name if hasattr(chat_session, 'silent_agent') else 'N/A'
+                "id": session_id,
             })
     return jsonify({"sessions": session_details}), 200
 

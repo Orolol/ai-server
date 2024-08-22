@@ -2,7 +2,7 @@ import json
 import os
 from app.agents.chat_session import ChatSession
 from app.models.base_model import ModelFactory
-from app.agents.base_agent import ChatAgent
+from app.agents.vocal_agent import VocalAgent
 from app.agents.silent_agent import SilentAgent
 from app.agents.action_organizer_agent import ActionOrganizerAgent
 
@@ -17,6 +17,7 @@ class SessionStorage:
             json.dump(session.to_dict(), f)
 
     def load_session(self, session_id, ai_provider):
+        print("Loading session", session_id)
         filename = f"{self.storage_dir}/{session_id}.json"
         if not os.path.exists(filename):
             return None
@@ -25,8 +26,7 @@ class SessionStorage:
         
         # Initialize agents
         strong_model = ModelFactory.create_model(ai_provider, "strong")
-        weak_model = ModelFactory.create_model(ai_provider, "weak")
-        vocal_agent = ChatAgent(strong_model)
+        vocal_agent = VocalAgent(strong_model)
         silent_agent = SilentAgent(memory_db_path="localhost", ai_provider=ai_provider, strength="weak")
         action_organizer_agent = ActionOrganizerAgent(strong_model, silent_agent)
         
