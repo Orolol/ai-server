@@ -81,14 +81,7 @@ const useChatSessionStore = create((set, get) => ({
       if (response.data.chatsessionsid) {
         set({ 
           chatSessionId: response.data.chatsessionsid,
-          sessionInfo: {
-            chatsessionsid: response.data.chatsessionsid,
-            creation_date: response.data.creation_date,
-            strong_model: response.data.strong_model,
-            weak_model: response.data.weak_model,
-            ai_provider: response.data.ai_provider,
-            system_message: response.data.system_message
-          }
+          sessionInfo: response.data
         });
         get().fetchMessages();
       }
