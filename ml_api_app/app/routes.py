@@ -143,14 +143,17 @@ def send_message():
 
 @routes.route('/save_session', methods=['POST'])
 def save_session():
+    global current_session
     data = request.get_json()
     chatsessionsid = data.get("chatsessionsid")
     
-    if not chatsessionsid or chatsessionsid not in chat_sessions:
+    if not chatsessionsid or chatsessionsid not in session_ids:
         return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
 
-    chat_session = chat_sessions[chatsessionsid]
-    session_storage.save_session(chat_session)
+    if current_session is None or current_session.session_id != chatsessionsid:
+        current_session = session_storage.load_session(chatsessionsid)
+
+    session_storage.save_session(current_session)
     
     return jsonify({"message": "Session saved successfully"}), 200
 
@@ -224,11 +227,13 @@ def clear_memory():
 # Web tab routes
 @routes.route('/get_web_action_history/<chatsessionsid>', methods=['GET'])
 def get_web_action_history(chatsessionsid):
-    if not chatsessionsid or chatsessionsid not in chat_sessions:
+    global current_session
+    if not chatsessionsid or chatsessionsid not in session_ids:
         return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
     try:
-        chat_session = chat_sessions[chatsessionsid]
-        history = chat_session.get_web_action_history()
+        if current_session is None or current_session.session_id != chatsessionsid:
+            current_session = session_storage.load_session(chatsessionsid)
+        history = current_session.get_web_action_history()
         return jsonify({"actions": history}), 200
     except Exception as e:
         print(f"Failed to get web action history: {str(e)}")
@@ -312,11 +317,13 @@ def search_memories():
 
 @routes.route('/get_memory_action_history/<chatsessionsid>', methods=['GET'])
 def get_memory_action_history(chatsessionsid):
-    if not chatsessionsid or chatsessionsid not in chat_sessions:
+    global current_session
+    if not chatsessionsid or chatsessionsid not in session_ids:
         return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
     try:
-        chat_session = chat_sessions[chatsessionsid]
-        history = chat_session.get_memory_action_history()
+        if current_session is None or current_session.session_id != chatsessionsid:
+            current_session = session_storage.load_session(chatsessionsid)
+        history = current_session.get_memory_action_history()
         # Convert the history to a list of dictionaries
         formatted_history = [
             {
