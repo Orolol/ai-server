@@ -44,20 +44,18 @@ class ChatSession:
         # Format the actions_result for the vocal agent and update action histories
         invisible_info = ""
         for action_name, result in actions_result.items():
-            invisible_info += f"[INVISIBLE TO USER] {action_name.capitalize()} result: {result} [/INVISIBLE TO USER]\n"
+            invisible_info += f"{action_name.capitalize()} result: {result}\n"
             action_entry = {
                 "type": action_name,
                 "details": result,
                 "timestamp": datetime.datetime.now().isoformat()
             }
-            if action_name in ["Web_search", "url_lookup"]:
-                self.web_action_history.append(action_entry)
-            elif action_name in ["memory_store", "memory_retrieve"]:
-                self.memory_action_history.append(action_entry)
+
+            self.memory_action_history.append(action_entry)
 
         # Enrich the data with the preprompt, user's prompt, and invisible actions result
         enriched_data = {
-            "prompt": f"{self.vocal_agent.preprompt}\n\n[INVISIBLE TO USER] The following information is not visible to the user and should be used to inform your response without directly referencing it:\n{invisible_info}\n\nUser's message: [/INVISIBLE TO USER]{data['prompt']}\n\nPlease respond to the user based on the above information:",
+            "prompt": f"[INVISIBLE TO USER]{self.vocal_agent.preprompt}\n\n The following information is not visible to the user and should be used to inform your response without directly referencing it:\n{invisible_info}\n\nUser's message: [/INVISIBLE TO USER]{data['prompt']}\n\n [INVISIBLE TO USER]Please respond to the user based on the above information:[/INVISIBLE TO USER]",
             "conversation_history": self.vocal_agent.conversation_history
         }
 
@@ -74,9 +72,11 @@ class ChatSession:
         return re.sub(r'\[INVISIBLE TO USER\].*?\[/INVISIBLE TO USER\]', '', text, flags=re.DOTALL)
 
     def get_web_action_history(self) -> List[Dict[str, Any]]:
+        print("Web action history: ", self.web_action_history)
         return self.web_action_history
 
     def get_memory_action_history(self) -> List[Dict[str, Any]]:
+        print("Memory action history: ", self.memory_action_history)
         return self.memory_action_history
 
     def get_messages(self) -> List[Dict[str, Any]]:

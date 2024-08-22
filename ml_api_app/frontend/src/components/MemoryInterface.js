@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import useChatSessionStore from '../store/chatSessionStore';
 
 function MemoryInterface() {
   const [memoryActions, setMemoryActions] = useState([]);
+
+  const {
+    chatSessionId,
+  } = useChatSessionStore();
 
   useEffect(() => {
     fetchMemoryActions();
@@ -10,7 +15,7 @@ function MemoryInterface() {
 
   const fetchMemoryActions = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/get_memory_action_history');
+      const response = await axios.get('http://localhost:5000/get_memory_action_history/' + chatSessionId);
       console.log('Memory actions response:', response.data);
       setMemoryActions(response.data.history || []);
     } catch (error) {
