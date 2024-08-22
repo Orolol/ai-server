@@ -1,14 +1,16 @@
 from app.agents.base_agent import Agent
 from app.models.base_model import Model
+from app.agents.web_agent import WebAgent
 from typing import Dict, Any, List
 import json
 from jinja2 import Environment, FileSystemLoader
 import datetime
 
 class ActionOrganizerAgent(Agent):
-    def __init__(self, model: Model, silent_agent):
+    def __init__(self, model: Model, silent_agent, web_agent: WebAgent):
         self.model = model
         self.silent_agent = silent_agent
+        self.web_agent = web_agent
         
         self.env = Environment(loader=FileSystemLoader('app/templates'))
         self.update_preprompt()
@@ -105,5 +107,7 @@ class ActionOrganizerAgent(Agent):
             return self.silent_agent.url_lookup_action(action_params)
         elif action_name == "Web_search":
             return self.silent_agent.web_search_action(action_params)
+        elif action_name == "web_action":
+            return self.web_agent.act(action_params)
         else:
             return f"Unknown action: {action_name}"

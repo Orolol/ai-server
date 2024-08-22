@@ -9,6 +9,7 @@ import json
 from typing import Dict, Any, List
 from app.utils.brave_search import BraveSearch
 from app.agents.base_agent import ModelAgent
+from app.agents.web_agent import WebAgent
 
 
 class SilentAgent(ModelAgent):
@@ -18,6 +19,7 @@ class SilentAgent(ModelAgent):
 
         env = Environment(loader=FileSystemLoader('app/templates'))
         self.brave_search = BraveSearch()
+        self.web_agent = WebAgent(model, memory_db_path)
 
     def act(self, data: Dict[str, Any]) -> Any:
         action = data.get("action")
@@ -28,6 +30,8 @@ class SilentAgent(ModelAgent):
             return self.url_lookup_action(data)
         elif action == "Web_search":
             return self.web_search_action(data)
+        elif action == "web_action":
+            return self.web_agent.act(data)
         else:
             raise ValueError(f"Unknown action: {action}")
 
