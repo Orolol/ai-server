@@ -6,6 +6,7 @@ from app.agents.coding_agent import CodingAgent
 from app.agents.chat_session import ChatSession
 from app.agents.silent_agent import SilentAgent
 from app.agents.action_organizer_agent import ActionOrganizerAgent
+from app.agents.web_agent import WebAgent
 from app.models.base_model import ModelFactory
 from app.memory.long_term_memory import LongTermMemory
 from config.ai_providers_config import ai_providers_config
@@ -331,3 +332,64 @@ def get_memory_action_history(chatsessionsid):
     except Exception as e:
         print(f"Error in get_memory_action_history: {str(e)}")
         return jsonify({"error": f"Failed to get memory action history: {str(e)}"}), 500
+
+@routes.route('/start_web_session', methods=['POST'])
+def start_web_session():
+    global current_session
+    data = request.get_json()
+    ai_provider = data.get("ai_provider", "openai")
+    start_url = data.get("start_url")
+    prompt = data.get("prompt")
+
+    if not start_url or not prompt:
+        return jsonify({"error": "start_url and prompt are required"}), 400
+
+    try:
+        strong_model = ModelFactory.create_model(ai_provider, "strong")
+        web_agent = WebAgent(strong_model)
+        chat_session = ChatSession(web_agent, web_agent, None, ai_provider)
+        chat_session.creation_date = datetime.now().isoformat()
+
+        current_session = chat_session
+        session_ids.append(chat_session.session_id)
+        session_storage.save_session(chat_session)
+
+        return jsonify({
+            "chatsessionsid": chat_session.session_id,
+            "creation_date": chat_session.creation_date,
+            "ai_provider": ai_provider
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to start web session: {str(e)}"}), 500
+
+@routes.route('/execute_web_action', methods=['POST'])
+def execute_web_action():
+    global current_session
+    data = request.get_json()
+    chatsessionsid = data.get("chatsessionsid")
+    
+    if not chatsessionsid or chatsessionsid not in session_ids:
+        return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
+
+    if current_session is None or current_session.session_id != chatsessionsid:
+        current_session = session_storage.load_session(chatsessionsid)
+
+    try:
+        result = current_session.vocal_agent.act(data)
+        session_storage.save_session(current_session)
+        return jsonify({"result": result}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to execute web action: {str(e)}"}), 500
+
+@routes.route('/get_web_action_history/<chatsessionsid>', methods=['GET'])
+def get_web_action_history(chatsessionsid):
+    global current_session
+    if not chatsessionsid or chatsessionsid not in session_ids:
+        return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
+    try:
+        if current_session is None or current_session.session_id != chatsessionsid:
+            current_session = session_storage.load_session(chatsessionsid)
+        history = current_session.vocal_agent.execution_history
+        return jsonify({"history": history}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to get web action history: {str(e)}"}), 500
