@@ -17,12 +17,11 @@ class SilentAgent(ModelAgent):
         super().__init__(model, memory_db_path)
 
         env = Environment(loader=FileSystemLoader('app/templates'))
-        template = env.get_template('silent_agent_preprompt.jinja')
-        self.preprompt = template.render({"date": datetime.datetime.now()})
         self.brave_search = BraveSearch()
 
     def act(self, data: Dict[str, Any]) -> Any:
         action = data.get("action")
+
         if action == "memory":
             return self.memory_action(data)
         elif action == "url_lookup":
@@ -34,12 +33,14 @@ class SilentAgent(ModelAgent):
 
     def memory_action(self, data: Dict[str, Any]) -> Any:
         action_type = data.get('type')
+        print("0000000000000000000000000000000")
+        print("ACTION IS", data)
         if not action_type:
             raise ValueError("Memory action type is missing or None")
         if action_type == 'memory_store':
             return self.memory.store_interaction(data.get('key'), data.get('value'), data.get('tags', []))
         elif action_type == 'memory_retrieve':
-            return self.memory.retrieve(data.get('key'))
+            return self.memory.retrieve_interactions(data.get('search_terms'))
         else:
             raise ValueError(f"Unknown memory action type: {action_type}")
 

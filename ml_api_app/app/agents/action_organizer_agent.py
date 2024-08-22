@@ -62,6 +62,7 @@ class ActionOrganizerAgent(Agent):
         Make sure that you have all the information needed to answer the user's query.
         If the user asks for information that you don't know, you an peroform a web search to find the information.
         If the user asks for information that you don't know but you thinks are present on website from previous search, do a URL lookup.
+        If the user asks for information that you don't know but you thinks aht the user told you before, do a memory action.
         If you plan  many actions, consider breaking them down into smaller steps.
         
         Return a JSON object with the following structure:
