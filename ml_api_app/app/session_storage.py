@@ -16,7 +16,7 @@ class SessionStorage:
         with open(filename, 'w') as f:
             json.dump(session.to_dict(), f)
 
-    def load_session(self, session_id, ai_provider):
+    def load_session(self, session_id):
         print("Loading session", session_id)
         filename = f"{self.storage_dir}/{session_id}.json"
         if not os.path.exists(filename):
@@ -25,6 +25,7 @@ class SessionStorage:
             data = json.load(f)
         
         # Initialize agents
+        ai_provider = data.get('ai_provider', 'openai')  # Default to 'openai' if not present
         strong_model = ModelFactory.create_model(ai_provider, "strong")
         vocal_agent = VocalAgent(strong_model)
         silent_agent = SilentAgent(memory_db_path="localhost", ai_provider=ai_provider, strength="weak")
