@@ -17,7 +17,8 @@ from flask import g
 long_term_memory = LongTermMemory()
 
 # Store chat sessions
-chat_sessions = {}
+session_ids = []
+current_session = None
 session_storage = SessionStorage()
 
 routes = Blueprint('routes', __name__)
@@ -56,6 +57,7 @@ def config_options():
 
 @routes.route('/start_chat', methods=['POST'])
 def start_chat():
+    global current_session
     print("Received request to start chat")
     data = request.get_json()
     print(f"Request data: {data}")
@@ -91,7 +93,9 @@ def start_chat():
             chat_session.creation_date = datetime.now().isoformat()
             print(f"Chat session created with ID: {chat_session.session_id} and creation date: {chat_session.creation_date}")
 
-        chat_sessions[chat_session.session_id] = chat_session
+        current_session = chat_session
+        if chat_session.session_id not in session_ids:
+            session_ids.append(chat_session.session_id)
         # Save the session
         session_storage.save_session(chat_session)
     except ValueError as e:
@@ -113,24 +117,27 @@ def start_chat():
 
 @routes.route('/send_message', methods=['POST'])
 def send_message():
+    global current_session
     data = request.get_json()
     print(f"Received data to send message: {data}")
 
     chatsessionsid = data.get("chatsessionsid")
     message = data.get("message")
     
-    if not chatsessionsid or chatsessionsid not in chat_sessions:
+    if not chatsessionsid or chatsessionsid not in session_ids:
         return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
     
     if not message:
         return jsonify({"error": "Missing message"}), 400
 
-    chat_session = chat_sessions[chatsessionsid]
-    response = chat_session.process_input({"prompt": message})
+    if current_session is None or current_session.session_id != chatsessionsid:
+        current_session = session_storage.load_session(chatsessionsid)
+
+    response = current_session.process_input({"prompt": message})
     print(f"Chat session response: {response}")
 
     # Save the updated session
-    session_storage.save_session(chat_session)
+    session_storage.save_session(current_session)
 
     return jsonify({"response": response})
 
@@ -149,13 +156,16 @@ def save_session():
 
 @routes.route('/load_session/<session_id>', methods=['GET'])
 def load_session(session_id):
+    global current_session
     ai_provider = request.args.get('ai_provider', 'openai')  # Default to 'openai' if not provided
     chat_session = session_storage.load_session(session_id, ai_provider)
     
     if not chat_session:
         return jsonify({"error": "Session not found"}), 404
 
-    chat_sessions[chat_session.session_id] = chat_session
+    current_session = chat_session
+    if session_id not in session_ids:
+        session_ids.append(session_id)
     
     return jsonify({
         "chatsessionsid": chat_session.session_id,
@@ -168,11 +178,10 @@ def load_session(session_id):
 
 @routes.route('/list_sessions', methods=['GET'])
 def list_sessions():
-    sessions = session_storage.list_sessions()
     session_details = []
-    for session in sessions:
+    for session_id in session_ids:
         ai_provider = "openai"  # Default provider
-        chat_session = session_storage.load_session(session, ai_provider)
+        chat_session = session_storage.load_session(session_id, ai_provider)
         if chat_session:
             session_details.append({
                 "id": chat_session.session_id,
@@ -184,18 +193,24 @@ def list_sessions():
 
 @routes.route('/delete_session/<session_id>', methods=['DELETE'])
 def delete_session(session_id):
+    global current_session
     session_storage.delete_session(session_id)
-    if session_id in chat_sessions:
-        del chat_sessions[session_id]
+    if session_id in session_ids:
+        session_ids.remove(session_id)
+    if current_session and current_session.session_id == session_id:
+        current_session = None
     return jsonify({"message": "Session deleted successfully"}), 200
 
 @routes.route('/get_messages/<chatsessionsid>', methods=['GET'])
 def get_messages(chatsessionsid):
-    if not chatsessionsid or chatsessionsid not in chat_sessions:
+    global current_session
+    if not chatsessionsid or chatsessionsid not in session_ids:
         return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
 
-    chat_session = chat_sessions[chatsessionsid]
-    messages = chat_session.get_messages()
+    if current_session is None or current_session.session_id != chatsessionsid:
+        current_session = session_storage.load_session(chatsessionsid)
+
+    messages = current_session.get_messages()
     return jsonify({"messages": messages}), 200
 
 @routes.route('/clear_memory', methods=['POST'])
