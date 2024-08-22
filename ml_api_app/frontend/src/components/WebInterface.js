@@ -71,7 +71,7 @@ function WebInterface({ chatSessionId }) {
       <ul>
         {webActions.map((action, index) => (
           <li key={index}>
-            {action.type} - {action.timestamp}
+            {action.type === 'Web_search' ? 'Web Search' : 'URL Lookup'} - {new Date(action.timestamp).toLocaleString()}
           </li>
         ))}
       </ul>
