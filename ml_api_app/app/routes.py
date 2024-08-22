@@ -1,7 +1,8 @@
 import os
 from flask import request, jsonify, Blueprint, send_from_directory, current_app, g
 from flask_cors import CORS
-from app.agents.base_agent import ChatAgent, CodingAgent
+from app.agents.vocal_agent import VocalAgent
+from app.agents.coding_agent import CodingAgent
 from app.agents.chat_session import ChatSession
 from app.agents.silent_agent import SilentAgent
 from app.agents.action_organizer_agent import ActionOrganizerAgent
@@ -39,7 +40,7 @@ def serve(path):
 def create_agent(agent_type, model, system_message=""):
     print(f"Creating agent of type: {agent_type} with model: {model}")
     if agent_type == "chat":
-        return ChatAgent(model, system_message=system_message)
+        return VocalAgent(model, system_message=system_message)
     elif agent_type == "coding":
         return CodingAgent(model, system_message=system_message)
     else:
@@ -210,7 +211,6 @@ def clear_memory():
 def get_web_action_history(chatsessionsid):
     if not chatsessionsid or chatsessionsid not in chat_sessions:
         return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
-
     try:
         chat_session = chat_sessions[chatsessionsid]
         history = chat_session.get_web_action_history()
@@ -295,10 +295,13 @@ def search_memories():
     except Exception as e:
         return jsonify({"error": f"Failed to search memories: {str(e)}"}), 500
 
-@routes.route('/get_memory_action_history', methods=['GET'])
-def get_memory_action_history():
+@routes.route('/get_memory_action_history/<chatsessionsid>', methods=['GET'])
+def get_memory_action_history(chatsessionsid):
+    if not chatsessionsid or chatsessionsid not in chat_sessions:
+        return jsonify({"error": "Invalid or missing chatsessionsid"}), 400
     try:
-        history = long_term_memory.get_memory_log()
+        chat_session = chat_sessions[chatsessionsid]
+        history = chat_session.get_memory_action_history()
         # Convert the history to a list of dictionaries
         formatted_history = [
             {
