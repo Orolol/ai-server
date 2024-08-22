@@ -5,19 +5,27 @@ import './MemoryInterface.css';
 
 function MemoryInterface() {
   const [memoryActions, setMemoryActions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { chatSessionId } = useChatSessionStore();
 
   useEffect(() => {
-    fetchMemoryActions();
+    if (chatSessionId) {
+      fetchMemoryActions();
+    }
   }, [chatSessionId]);
 
   const fetchMemoryActions = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const response = await axios.get(`http://localhost:5000/get_memory_action_history/${chatSessionId}`);
-      console.log('Memory actions response:', response.data);
       setMemoryActions(response.data.history || []);
     } catch (error) {
       console.error('Failed to fetch memory actions:', error);
+      setError('Failed to load memory actions. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -30,23 +38,45 @@ function MemoryInterface() {
     }
   };
 
+  const formatTimestamp = (timestamp) => {
+    return new Date(timestamp).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (isLoading) {
+    return <div className="memory-interface">Loading memory actions...</div>;
+  }
+
+  if (error) {
+    return <div className="memory-interface error">{error}</div>;
+  }
+
   return (
     <div className="memory-interface">
       <h2>Memory Actions</h2>
-      <div className="memory-list">
-        {memoryActions.map((action, index) => (
-          <div key={index} className="memory-item">
-            <div className="memory-icon">{getActionIcon(action.type)}</div>
-            <div className="memory-content">
-              <div className="memory-header">
-                <span className="memory-type">{action.type}</span>
-                <span className="memory-timestamp">{new Date(action.timestamp).toLocaleString()}</span>
+      {memoryActions.length === 0 ? (
+        <p>No memory actions recorded yet.</p>
+      ) : (
+        <div className="memory-list">
+          {memoryActions.map((action, index) => (
+            <div key={index} className="memory-item">
+              <div className="memory-icon">{getActionIcon(action.type)}</div>
+              <div className="memory-content">
+                <div className="memory-header">
+                  <span className="memory-type">{action.type.charAt(0).toUpperCase() + action.type.slice(1)}</span>
+                  <span className="memory-timestamp">{formatTimestamp(action.timestamp)}</span>
+                </div>
+                <div className="memory-details">{action.details}</div>
               </div>
-              <div className="memory-details">{action.details}</div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
