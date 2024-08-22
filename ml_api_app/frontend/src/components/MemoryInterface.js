@@ -21,7 +21,7 @@ function MemoryInterface() {
     try {
       const response = await axios.get(`http://localhost:5000/get_memory_action_history/${chatSessionId}`);
       console.log('Memory actions:', response.data);
-      setMemoryActions(response.data.history || []);
+      setMemoryActions(response.data || []);
     } catch (error) {
       console.error('Failed to fetch memory actions:', error);
       setError('Failed to load memory actions. Please try again later.');
@@ -32,9 +32,9 @@ function MemoryInterface() {
 
   const getActionIcon = (type) => {
     switch (type) {
-      case 'add': return '➕';
-      case 'delete': return '🗑️';
-      case 'update': return '🔄';
+      case 'actions_result': return '🔍';
+      case 'final_status': return '🏁';
+      case 'iterations': return '🔄';
       default: return '📝';
     }
   };
@@ -45,8 +45,26 @@ function MemoryInterface() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      second: '2-digit'
     });
+  };
+
+  const renderActionDetails = (action) => {
+    if (action.type === 'actions_result' && action.details && Object.keys(action.details).length > 0) {
+      return (
+        <ul className="action-details-list">
+          {Object.entries(action.details).map(([key, value]) => (
+            <li key={key}>
+              <strong>{key}:</strong> {typeof value === 'string' ? value : JSON.stringify(value)}
+            </li>
+          ))}
+        </ul>
+      );
+    } else if (action.type === 'final_status' || action.type === 'iterations') {
+      return <span className="action-details">{action.details}</span>;
+    }
+    return null;
   };
 
   if (isLoading) {
@@ -72,7 +90,7 @@ function MemoryInterface() {
                   <span className="memory-type">{action.type.charAt(0).toUpperCase() + action.type.slice(1)}</span>
                   <span className="memory-timestamp">{formatTimestamp(action.timestamp)}</span>
                 </div>
-                <div className="memory-details">{action.details}</div>
+                {renderActionDetails(action)}
               </div>
             </div>
           ))}
