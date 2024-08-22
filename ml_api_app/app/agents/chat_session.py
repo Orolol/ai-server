@@ -79,6 +79,14 @@ class ChatSession:
         print("Memory action history: ", self.memory_action_history)
         return self.memory_action_history
 
+    def add_memory_action(self, action_type: str, details: str):
+        action_entry = {
+            "type": action_type,
+            "details": details,
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        self.memory_action_history.append(action_entry)
+
     def get_messages(self) -> List[Dict[str, Any]]:
         """
         Retrieve the conversation history.

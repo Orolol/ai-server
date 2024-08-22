@@ -4,20 +4,17 @@ import useChatSessionStore from '../store/chatSessionStore';
 
 function MemoryInterface() {
   const [memoryActions, setMemoryActions] = useState([]);
-
-  const {
-    chatSessionId,
-  } = useChatSessionStore();
+  const { chatSessionId } = useChatSessionStore();
 
   useEffect(() => {
     fetchMemoryActions();
-  }, []);
+  }, [chatSessionId]);
 
   const fetchMemoryActions = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/get_memory_action_history/' + chatSessionId);
+      const response = await axios.get(`http://localhost:5000/get_memory_action_history/${chatSessionId}`);
       console.log('Memory actions response:', response.data);
-      setMemoryActions(response.data.history || []);
+      setMemoryActions(response.data || []);
     } catch (error) {
       console.error('Failed to fetch memory actions:', error);
     }
@@ -29,11 +26,9 @@ function MemoryInterface() {
       <ul>
         {memoryActions.map((action, index) => (
           <li key={index}>
-            <strong>{action.agent_type}</strong> - {action.date}
+            <strong>{action.type}</strong> - {new Date(action.timestamp).toLocaleString()}
             <br />
-            Keywords: {action.keywords.join(', ')}
-            <br />
-            Summary: {action.interaction_summary}
+            Details: {action.details}
           </li>
         ))}
       </ul>
