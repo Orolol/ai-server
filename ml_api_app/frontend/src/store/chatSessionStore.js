@@ -33,6 +33,7 @@ const useChatSessionStore = create((set, get) => ({
   fetchSessionInfo: async (sessionId) => {
     try {
       const response = await axios.get(`http://localhost:5000/load_session/${sessionId}`);
+      console.log(response.data);
       if (response.data.chatsessionsid) {
         set({
           sessionInfo: {

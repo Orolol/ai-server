@@ -23,12 +23,10 @@ function ConfigInterface() {
 
   useEffect(() => {
     fetchConfigOptions();
-    if (chatSessionId) {
-      fetchSessionInfo(chatSessionId);
-    } else {
+    if (!chatSessionId) {
       fetchExistingSessions();
     }
-  }, [chatSessionId, fetchSessionInfo]);
+  }, [chatSessionId]);
 
   const fetchConfigOptions = async () => {
     if (aiProviders.length === 0) {
