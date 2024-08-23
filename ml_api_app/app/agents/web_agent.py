@@ -159,15 +159,17 @@ class WebAgent(ModelAgent):
         for script in soup(["script", "style"]):
             script.decompose()
         
-        # Supprimer les attributs inutiles
+        # Conserver uniquement les attributs utiles
         for tag in soup.find_all(True):
-            tag.attrs = {key: value for key, value in tag.attrs.items() if key in ['href', 'src', 'id', 'class']}
+            tag.attrs = {key: value for key, value in tag.attrs.items() if key in ['href', 'src', 'id', 'class', 'name', 'type', 'value']}
         
-        # Garder seulement le contenu visible
-        visible_text = soup.find_all(text=True)
-        visible_text = ' '.join(text.strip() for text in visible_text if text.strip())
+        # Remplacer le contenu textuel par des espaces réservés
+        for element in soup.find_all(text=True):
+            if element.parent.name not in ['style', 'script', 'head', 'title', 'meta', '[document]']:
+                element.replace_with('[TEXT]')
         
-        return visible_text
+        # Retourner la structure HTML nettoyée
+        return str(soup)
 
     def parse_plan(self, plan_response):
         # Implement parsing logic for the plan
