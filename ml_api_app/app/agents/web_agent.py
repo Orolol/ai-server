@@ -11,6 +11,7 @@ import io
 import base64
 import time
 import os
+import subprocess
 
 class WebAgent(ModelAgent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
@@ -31,6 +32,13 @@ class WebAgent(ModelAgent):
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
+        
+        try:
+            # Try to find Chrome binary
+            chrome_path = subprocess.check_output(["which", "google-chrome"]).decode().strip()
+            chrome_options.binary_location = chrome_path
+        except subprocess.CalledProcessError:
+            print("Could not find Google Chrome. Make sure it's installed and in your PATH.")
         
         try:
             service = Service(ChromeDriverManager().install())
