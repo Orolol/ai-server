@@ -19,6 +19,23 @@ from bs4 import BeautifulSoup
 
 class WebAgent(ModelAgent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
+        preprompt = """You are a web navigation assistant. Your task is to create a plan of action based on the user's prompt and the current state of the web page. 
+        When creating a plan, follow these guidelines:
+        1. Analyze the current HTML structure and the screenshot provided.
+        2. Create a list of steps to accomplish the user's goal.
+        3. Each step should be a clear, actionable instruction that can be translated into Selenium code.
+        4. Your response should be a numbered list of steps, each on a new line.
+        5. Be specific about which elements to interact with (e.g., use IDs, classes, or other attributes).
+        6. Consider common web interactions like clicking buttons, filling forms, scrolling, etc.
+        7. If the goal requires navigating to different pages, include those steps.
+        8. Limit your plan to a maximum of 10 steps for efficiency.
+
+        Example format:
+        1. Click the 'Login' button with id 'login-btn'
+        2. Enter 'username@example.com' in the input field with name 'email'
+        3. Enter 'password123' in the input field with id 'password'
+        4. Click the 'Submit' button with class 'submit-btn'
+        """
         super().__init__(model, memory_db_path, preprompt, system_message)
         print("WebAgent init")
         self.driver = self.setup_webdriver()
@@ -172,14 +189,22 @@ class WebAgent(ModelAgent):
         return str(soup)
 
     def parse_plan(self, plan_response):
-        # Implement parsing logic for the plan
-        # This should return a list of steps
-        pass
+        # Split the response into lines and remove any empty lines
+        lines = [line.strip() for line in plan_response.split('\n') if line.strip()]
+        
+        # Parse each line as a step, removing the number at the beginning
+        steps = []
+        for line in lines:
+            # Remove the step number and any leading/trailing whitespace
+            step = line.split('.', 1)[-1].strip()
+            if step:
+                steps.append(step)
+        
+        return steps
 
     def parse_verification(self, verification_result):
-        # Implement parsing logic for the verification result
-        # This should return a boolean indicating success or failure
-        pass
+        # For simplicity, let's assume the model returns "Success" or "Failure"
+        return "Success" in verification_result
 
     def __del__(self):
         if self.driver:
