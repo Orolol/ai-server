@@ -48,11 +48,6 @@ class WebAgent(ModelAgent):
             return driver
         except Exception as e:
             print(f"Error setting up WebDriver: {str(e)}")
-            # Additional error information
-            import sys
-            print(f"Python version: {sys.version}")
-            print(f"Selenium version: {webdriver.__version__}")
-            print(f"ChromeDriver version: {driver.capabilities['chrome']['chromedriverVersion']}")
             raise
 
     def act(self, data):
