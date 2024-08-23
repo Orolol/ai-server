@@ -6,6 +6,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.core.utils import read_version_from_cmd 
+from webdriver_manager.core.os_manager import PATTERN
+
 from PIL import Image
 import io
 import base64
@@ -40,22 +43,26 @@ class WebAgent(ModelAgent):
         chrome_options.add_argument("--single-process")
         
         # Specify Chrome binary location (adjust path as needed)
-        chrome_binary = "/usr/bin/google-chrome-stable"
+        chrome_binary = "/home/gmartin/chrome-linux64/chrome"
         if os.path.exists(chrome_binary):
             chrome_options.binary_location = chrome_binary
+            version = read_version_from_cmd(chrome_binary + "--version", PATTERN["google-chrome"])
+            print(f"Chrome binary found at {chrome_binary}.")
         else:
             print(f"Chrome binary not found at {chrome_binary}. Falling back to default.")
         
         try:
-            service = Service(ChromeDriverManager().install())
+            print("Setting up WebDriver")
+            service = Service(ChromeDriverManager(driver_version=version).install())
             driver = webdriver.Chrome(service=service, options=chrome_options)
+            driver.set_window_size(800, 600)
+            print("WebDriver set up")
             driver.set_page_load_timeout(30)
             return driver
         except Exception as e:
             print(f"Error setting up WebDriver: {str(e)}")
             print(f"Chrome options: {chrome_options.arguments}")
             print(f"Chrome binary location: {chrome_options.binary_location}")
-            print(f"ChromeDriver path: {service.path}")
             raise
 
     def act(self, data):
@@ -82,7 +89,9 @@ class WebAgent(ModelAgent):
             "html": self.current_html,
             "screenshot": self.current_screenshot
         }
+        print("Plan input: ", plan_input)
         plan_response = self.model.predict(plan_input)
+        print("Plan response: ", plan_response)
         self.plan = self.parse_plan(plan_response)
 
     def execute_step(self, step, prompt):
@@ -92,7 +101,9 @@ class WebAgent(ModelAgent):
             "html": self.current_html,
             "screenshot": self.current_screenshot
         }
+        print("Step input: ", step_input)
         selenium_code = self.model.predict(step_input)
+        print("Selenium code: ", selenium_code)
         
         try:
             exec(selenium_code)
