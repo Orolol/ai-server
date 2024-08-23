@@ -15,6 +15,7 @@ import base64
 import time
 import os
 import subprocess
+from bs4 import BeautifulSoup
 
 class WebAgent(ModelAgent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
@@ -80,7 +81,7 @@ class WebAgent(ModelAgent):
     def navigate_to_url(self, url):
         self.driver.get(url)
         self.current_url = url
-        self.current_html = self.driver.page_source
+        self.current_html = self.clean_html(self.driver.page_source)
         self.current_screenshot = self.take_screenshot()
 
     def create_plan(self, prompt):
@@ -108,7 +109,7 @@ class WebAgent(ModelAgent):
         try:
             exec(selenium_code)
             time.sleep(2)  # Wait for page to load
-            self.current_html = self.driver.page_source
+            self.current_html = self.clean_html(self.driver.page_source)
             self.current_screenshot = self.take_screenshot()
             
             verification_input = {
@@ -150,6 +151,23 @@ class WebAgent(ModelAgent):
         buffered = io.BytesIO()
         image.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode()
+
+    def clean_html(self, html):
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        # Supprimer les scripts et les styles
+        for script in soup(["script", "style"]):
+            script.decompose()
+        
+        # Supprimer les attributs inutiles
+        for tag in soup.find_all(True):
+            tag.attrs = {key: value for key, value in tag.attrs.items() if key in ['href', 'src', 'id', 'class']}
+        
+        # Garder seulement le contenu visible
+        visible_text = soup.find_all(text=True)
+        visible_text = ' '.join(text.strip() for text in visible_text if text.strip())
+        
+        return visible_text
 
     def parse_plan(self, plan_response):
         # Implement parsing logic for the plan
