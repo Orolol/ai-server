@@ -32,22 +32,30 @@ class WebAgent(ModelAgent):
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
-        chrome_options.add_argument("--remote-debugging-port=9222")  # Add this line
+        chrome_options.add_argument("--remote-debugging-port=9222")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--disable-setuid-sandbox")
+        chrome_options.add_argument("--no-first-run")
+        chrome_options.add_argument("--no-zygote")
+        chrome_options.add_argument("--single-process")
         
-        try:
-            # Try to find Chrome binary
-            chrome_path = subprocess.check_output(["which", "google-chrome"]).decode().strip()
-            chrome_options.binary_location = chrome_path
-        except subprocess.CalledProcessError:
-            print("Could not find Google Chrome. Make sure it's installed and in your PATH.")
+        # Specify Chrome binary location (adjust path as needed)
+        chrome_binary = "/usr/bin/google-chrome-stable"
+        if os.path.exists(chrome_binary):
+            chrome_options.binary_location = chrome_binary
+        else:
+            print(f"Chrome binary not found at {chrome_binary}. Falling back to default.")
         
         try:
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=chrome_options)
-            driver.set_page_load_timeout(30)  # Set page load timeout
+            driver.set_page_load_timeout(30)
             return driver
         except Exception as e:
             print(f"Error setting up WebDriver: {str(e)}")
+            print(f"Chrome options: {chrome_options.arguments}")
+            print(f"Chrome binary location: {chrome_options.binary_location}")
+            print(f"ChromeDriver path: {service.path}")
             raise
 
     def act(self, data):
