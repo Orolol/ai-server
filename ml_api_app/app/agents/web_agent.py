@@ -13,12 +13,14 @@ import os
 class WebAgent(ModelAgent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
         super().__init__(model, memory_db_path, preprompt, system_message)
+        print("WebAgent init")
         self.driver = self.setup_webdriver()
         self.current_url = None
         self.current_html = None
         self.current_screenshot = None
         self.plan = []
         self.execution_history = []
+        print("WebAgent init done")
 
     def setup_webdriver(self):
         chrome_options = Options()
