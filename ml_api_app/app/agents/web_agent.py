@@ -32,6 +32,7 @@ class WebAgent(ModelAgent):
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--remote-debugging-port=9222")  # Add this line
         
         try:
             # Try to find Chrome binary
@@ -42,9 +43,16 @@ class WebAgent(ModelAgent):
         
         try:
             service = Service(ChromeDriverManager().install())
-            return webdriver.Chrome(service=service, options=chrome_options)
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            driver.set_page_load_timeout(30)  # Set page load timeout
+            return driver
         except Exception as e:
             print(f"Error setting up WebDriver: {str(e)}")
+            # Additional error information
+            import sys
+            print(f"Python version: {sys.version}")
+            print(f"Selenium version: {webdriver.__version__}")
+            print(f"ChromeDriver version: {driver.capabilities['chrome']['chromedriverVersion']}")
             raise
 
     def act(self, data):
