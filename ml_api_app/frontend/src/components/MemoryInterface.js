@@ -21,7 +21,7 @@ function MemoryInterface() {
     try {
       const response = await axios.get(`http://localhost:5000/get_memory_action_history/${chatSessionId}`);
       console.log('Memory actions:', response.data);
-      setMemoryActions(response.data || []);
+      setMemoryActions(response.data.history || []);
     } catch (error) {
       console.error('Failed to fetch memory actions:', error);
       setError('Failed to load memory actions. Please try again later.');

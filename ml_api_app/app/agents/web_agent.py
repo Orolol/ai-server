@@ -19,22 +19,32 @@ from bs4 import BeautifulSoup
 
 class WebAgent(ModelAgent):
     def __init__(self, model, memory_db_path="localhost", preprompt="", system_message=""):
-        preprompt = """You are a web navigation assistant. Your task is to create a plan of action based on the user's prompt and the current state of the web page. 
+        self.plan_preprompt = """
+        You are a web navigation assistant. Your goal is to provides a plan of action for another agent that will generate selenium scripts.
+        Your task is to create a plan of action based on the user's prompt and the current state of the web page. 
         When creating a plan, follow these guidelines:
+        
+        IMPORTANT : Only answer with the plan, nothing else, no explanation, no other text.
+        
         1. Analyze the current HTML structure and the screenshot provided.
         2. Create a list of steps to accomplish the user's goal.
-        3. Each step should be a clear, actionable instruction that can be translated into Selenium code.
-        4. Your response should be a numbered list of steps, each on a new line.
-        5. Be specific about which elements to interact with (e.g., use IDs, classes, or other attributes).
-        6. Consider common web interactions like clicking buttons, filling forms, scrolling, etc.
-        7. If the goal requires navigating to different pages, include those steps.
-        8. Limit your plan to a maximum of 10 steps for efficiency.
+        3. Each step should be sufficiently detailed to to navigate the current page and execute all action related to this page
+        4. If you lack information to continue, create a next step.
+        5. The last step should serve to complete the user's goal.
 
         Example format:
-        1. Click the 'Login' button with id 'login-btn'
-        2. Enter 'username@example.com' in the input field with name 'email'
-        3. Enter 'password123' in the input field with id 'password'
-        4. Click the 'Submit' button with class 'submit-btn'
+        1. Click the 'Login' button with id 'login-btn', Enter 'username@example.com' in the input field with name 'email', Enter 'password123' in the input field with id 'password, Click the 'Submit' button with class 'submit-btn'
+        2. Extract the value on the account summary page with id 'account-summary'
+        
+        User prompt : 
+        """
+        
+        self.selenium_preprompt = """
+        You are a web navigation assistant.  Your task is to create a Selenium script that will accomplish the user's goal.
+
+        Important : Only answer with the Selenium script, nothing else, no explanation, no other text.
+
+        User prompt :
         """
         super().__init__(model, memory_db_path, preprompt, system_message)
         print("WebAgent init")
@@ -103,24 +113,25 @@ class WebAgent(ModelAgent):
 
     def create_plan(self, prompt):
         plan_input = {
-            "prompt": prompt,
+            "prompt": self.plan_preprompt + prompt,
             "html": self.current_html,
-            "screenshot": self.current_screenshot
+            #"screenshot": self.current_screenshot
         }
-        print("Plan input: ", plan_input)
+        # print("Plan input: ", plan_input)
         plan_response = self.model.predict(plan_input)
         print("Plan response: ", plan_response)
         self.plan = self.parse_plan(plan_response)
 
     def execute_step(self, step, prompt):
         step_input = {
-            "prompt": prompt,
+            "prompt": self.selenium_preprompt,
             "current_step": step,
             "html": self.current_html,
-            "screenshot": self.current_screenshot
+            # "screenshot": self.current_screenshot
         }
-        print("Step input: ", step_input)
+        # print("Step input: ", step_input)
         selenium_code = self.model.predict(step_input)
+        print("Step", step)
         print("Selenium code: ", selenium_code)
         
         try:
@@ -133,7 +144,7 @@ class WebAgent(ModelAgent):
                 "prompt": prompt,
                 "plan": self.plan,
                 "current_step": step,
-                "screenshot": self.current_screenshot
+                #"screenshot": self.current_screenshot
             }
             verification_result = self.model.predict(verification_input)
             

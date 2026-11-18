@@ -5,11 +5,12 @@ import datetime
 import re
 
 class ChatSession:
-    def __init__(self, silent_agent, vocal_agent, action_organizer_agent, session_id=None, conversation_history=None):
+    def __init__(self, silent_agent, vocal_agent, action_organizer_agent, ai_provider, session_id=None, conversation_history=None):
         self.session_id = session_id or str(uuid.uuid4())
         self.silent_agent = silent_agent
         self.vocal_agent = vocal_agent
         self.action_organizer_agent = action_organizer_agent
+        self.ai_provider = ai_provider
         self.web_action_history: List[Dict[str, Any]] = []
         self.memory_action_history: List[Dict[str, Any]] = []
         if conversation_history:
@@ -20,14 +21,15 @@ class ChatSession:
             'session_id': self.session_id,
             'conversation_history': self.vocal_agent.conversation_history,
             'web_action_history': self.web_action_history,
-            'memory_action_history': self.memory_action_history
+            'memory_action_history': self.memory_action_history,
+            'ai_provider': self.ai_provider
         }
 
     @classmethod
-    def from_dict(cls, data, silent_agent, vocal_agent, action_organizer_agent):
+    def from_dict(cls, data, silent_agent, vocal_agent, action_organizer_agent, ai_provider):
         if vocal_agent is None:
             raise ValueError("vocal_agent must be provided and cannot be None")
-        session = cls(silent_agent, vocal_agent, action_organizer_agent, 
+        session = cls(silent_agent, vocal_agent, action_organizer_agent, ai_provider,
                       session_id=data['session_id'], 
                       conversation_history=data['conversation_history'])
         session.web_action_history = data['web_action_history']

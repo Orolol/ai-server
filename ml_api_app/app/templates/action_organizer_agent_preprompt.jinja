@@ -26,13 +26,14 @@ If the user asks for information that you don't know but you thinks aht the user
 If you plan  many actions, consider breaking them down into smaller steps.
 
 Return a JSON object with the following structure:
-{{
+{
     "actions": [
-        {{"name": "action_name", "parameters": {{"param1": "value1", "param2": "value2"}}}},
-        ...
+         {"name": "action_name", "parameters": 
+            {"param1": "value1", "param2": "value2"}
+         },
     ],
     "status": "in_progress" | "complete" | "cannot_answer"
-}}
+}
 
 Set the status to:
 - "in_progress" if more actions are needed to gather information

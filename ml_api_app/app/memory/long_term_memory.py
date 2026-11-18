@@ -81,7 +81,7 @@ class LongTermMemory:
         try:
             results = self.collection.query(
                 query_texts=keywords,
-                n_results=10
+                n_results=5
             )
             interactions = results['documents'][0] if results['documents'] else []
             logger.info(f"Retrieved {len(interactions)} interactions for keywords {keywords}")

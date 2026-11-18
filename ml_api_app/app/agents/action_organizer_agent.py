@@ -16,7 +16,7 @@ class ActionOrganizerAgent(Agent):
         self.update_preprompt()
     
     def update_preprompt(self):
-        template = self.env.get_template('silent_agent_preprompt.jinja')
+        template = self.env.get_template('action_organizer_agent_preprompt.jinja')
         self.preprompt = template.render({"date": datetime.datetime.now().strftime("%Y-%m-%d")})
 
     def act(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -42,7 +42,10 @@ class ActionOrganizerAgent(Agent):
             
             if "actions" in analysis:
                 for action in analysis["actions"]:
+                    print("######################################################")
+                    print("ACTION EXCECUTION: ", action)
                     action_result = self.execute_action(action)
+                    print("ACTION RESULT: ", action_result)
                     actions_result[action["name"]] = action_result
                     all_results.append({"action": action["name"], "result": action_result})
             
@@ -59,27 +62,6 @@ class ActionOrganizerAgent(Agent):
     def analyze_message(self, message: str) -> Dict[str, Any]:
         self.update_preprompt()  # Ensure the date is current
         analysis_prompt = f"""Analyze this message and determine if any actions are needed: {message}
-
-        Reuse informatiosn from previous actions if needed, like URLS to perform web search.
-        Make sure that you have all the information needed to answer the user's query.
-        If the user asks for information that you don't know, you an peroform a web search to find the information.
-        If the user asks for information that you don't know but you thinks are present on website from previous search, do a URL lookup.
-        If the user asks for information that you don't know but you thinks aht the user told you before, do a memory action.
-        If you plan  many actions, consider breaking them down into smaller steps.
-        
-        Return a JSON object with the following structure:
-        {{
-            "actions": [
-                {{"name": "action_name", "parameters": {{"param1": "value1", "param2": "value2"}}}},
-                ...
-            ],
-            "status": "in_progress" | "complete" | "cannot_answer"
-        }}
-
-        Set the status to:
-        - "in_progress" if more actions are needed to gather information
-        - "complete" if we have all the information needed to answer the prompt
-        - "cannot_answer" if we determine that we can't answer even with more actions
         """
         analysis_result = self.model.predict({
             "conversation_history": [

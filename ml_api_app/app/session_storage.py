@@ -4,6 +4,7 @@ from app.agents.chat_session import ChatSession
 from app.models.base_model import ModelFactory
 from app.agents.vocal_agent import VocalAgent
 from app.agents.silent_agent import SilentAgent
+from app.agents.web_agent import WebAgent
 from app.agents.action_organizer_agent import ActionOrganizerAgent
 
 class SessionStorage:
@@ -28,10 +29,11 @@ class SessionStorage:
         ai_provider = data.get('ai_provider', 'openai')  # Default to 'openai' if not present
         strong_model = ModelFactory.create_model(ai_provider, "strong")
         vocal_agent = VocalAgent(strong_model)
+        web_agent = WebAgent(strong_model)
         silent_agent = SilentAgent(memory_db_path="localhost", ai_provider=ai_provider, strength="weak")
-        action_organizer_agent = ActionOrganizerAgent(strong_model, silent_agent)
+        action_organizer_agent = ActionOrganizerAgent(strong_model, silent_agent, web_agent)
         
-        return ChatSession.from_dict(data, silent_agent, vocal_agent, action_organizer_agent)
+        return ChatSession.from_dict(data, silent_agent, vocal_agent, action_organizer_agent, ai_provider)
 
     def delete_session(self, session_id):
         filename = f"{self.storage_dir}/{session_id}.json"

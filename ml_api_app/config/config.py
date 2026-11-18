@@ -1,4 +1,5 @@
-from ml_api_app.config.ai_providers_config import ai_providers_config
+from config.ai_providers_config import ai_providers_config
+
 
 class Config:
     DEBUG = True
